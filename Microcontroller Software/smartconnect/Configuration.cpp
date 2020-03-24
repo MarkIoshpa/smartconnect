@@ -1,5 +1,6 @@
 #include "Configuration.h"
 
+// Reads all values from EEPROM
 void Configuration::setup()
 {
   int i;
@@ -9,7 +10,7 @@ void Configuration::setup()
   microcontrollerid = EEPROM.read(ADDRESS_ID);
 
   // Load max slave address
-  maxSlaveAddress = EEPROM.read(MAX_SLAVE_ADDRESS);
+  maxSlaveAddress = EEPROM.read(ADDRESS_MAX_SLAVE);
 
   // Load description from EEPROM
   for(i = 0; i < DESCRIPTION_LENGTH; i++)
@@ -24,6 +25,8 @@ void Configuration::setup()
     deviceData[i] = tempDeviceData;
   }
 }
+
+// Getters and Setters for Configuration Data //////////////////////////////////////////////////////////////
 
 byte Configuration::getId()
 {
@@ -47,7 +50,7 @@ byte Configuration::getMaxSlaveAddress()
   return maxSlaveAddress;
 }
 
-bool Configuration::getMaxSlaveAddress(byte address)
+bool Configuration::setMaxSlaveAddress(byte address)
 {
   // I2C address range between 1 and 127
   // if 0 then microcontroller is only a slave
@@ -56,7 +59,7 @@ bool Configuration::getMaxSlaveAddress(byte address)
     return false;
 
   maxSlaveAddress = address;
-  EEPROM.write(MAX_SLAVE_ADDRESS, address);
+  EEPROM.write(ADDRESS_MAX_SLAVE, address);
 
   return true;
 }

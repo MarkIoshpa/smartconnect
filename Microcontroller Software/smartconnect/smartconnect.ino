@@ -2,21 +2,36 @@
 #include "Slave.h"
 
 // I2C Master/Slave Wires
+
 Master MasterWire = Master();
 Slave SlaveWire = Slave();
 
 // State Enumeration
-enum State { Idle, ReceiveRequestFromMaster, SendRequestToSlave, RequestResponseFromSlave, ReceiveResponseFromSlave};
+
+enum State { Idle, Working};
 State state = Idle;
 
 // Operation Code Definitions
+
 #define GET_CONFIG_DATA 1
 #define SET_CONFIG_DATA 2
-#define READ_DEVICE 3
-#define WRITE_DEVICE 4
+#define READ_DEVICE     3
+#define WRITE_DEVICE    4
+
+// Completion Code Definitions
+
+#define SUCCESS       0
+#define BUFFER_FULL   1
+#define ADDRESS_NACK  2
+#define DATA_NACK     3
+#define OTHER         4
+#define FAILED        5
 
 // Buffer for messages between master and slave
 byte buffer[BUFF_SIZE];
+
+// Address of slave that the message should be sent to
+int requestAddress;
 
 // Setup
 void setup() 
@@ -75,13 +90,14 @@ void getConfigData()
 {
   int i;
 
-  buffer[COMPLETECODE_OFFSET] = 0;
-  buffer[DATA_LENGTH_OFFSET] = 1 + DESCRIPTION_LENGTH + DEVICE_NUMBER*3;
+  buffer[COMPLETECODE_OFFSET] = SUCCESS;
+  buffer[DATA_LENGTH_OFFSET] = 2 + DESCRIPTION_LENGTH + DEVICE_NUMBER*3;
   buffer[PACKAGE_LENGTH_OFFSET] = 3 + buffer[DATA_LENGTH_OFFSET]; // 3 bytes for data length, completion code and package length.
-  buffer[DATA_OFFSET] = BoardConfiguration.getId();
+  buffer[DATA_OFFSET + ADDRESS_ID] = BoardConfiguration.getId();
+  buffer[DATA_OFFSET + ADDRESS_MAX_SLAVE] = BoardConfiguration.getMaxSlaveAddress();
   
   for(i = 0; i < DESCRIPTION_LENGTH; i++)
-    buffer[DATA_OFFSET+1+i] = (BoardConfiguration.getDescription())[i];
+    buffer[DATA_OFFSET+ADDRESS_DESC+i] = (BoardConfiguration.getDescription())[i];
   
   for(i = 0; i < DEVICE_NUMBER; i++)
   {
@@ -106,6 +122,17 @@ void writeDevice()
 
 }
 
+// Finds next address and deletes current one from buffer
+int findNextSlaveAddress()
+{
+  // Delete current microcontroller's address by shifting buffer
+  for(int i = ADDRESS_OFFSET; i < buffer[PACKAGE_LENGTH_OFFSET] - 1; i++)
+    buffer[i] = buffer[i+1];
+  buffer[PACKAGE_LENGTH_OFFSET] = buffer[PACKAGE_LENGTH_OFFSET] - 1;
+  buffer[ADDRESS_LENGTH_OFFSET] = buffer[ADDRESS_LENGTH_OFFSET] - 1;
+  return buffer[ADDRESS_OFFSET];
+}
+
 // Main Loop
 void loop() 
 {
@@ -114,44 +141,29 @@ void loop()
     case Idle:
       break;
 
-    case ReceiveRequestFromMaster:
-      Serial.println(F("Receieve Request from master !"));
+    case Working:
+      // Received a request from a master
       SlaveWire.receiveRequest(buffer);
-      if(buffer[ADDRESS_OFFSET+buffer[ADDRESS_LENGTH_OFFSET]-1] == BoardConfiguration.getId())
+
+      if(buffer[ADDRESS_LENGTH_OFFSET] == 1) // Operation designated for this microcontroller
       {
-        Serial.println(F("Executing Operation!"));
+        // Execute operation and wait until master requests to send result
         executeOperation();
       }
-      else
+      else  // Operation designated for a microcontroller lower in the hierarchy
       {
-        state = SendRequestToSlave; 
+        // Request slave to perform operation
+        requestAddress = findNextSlaveAddress();
+        MasterWire.sendRequest(buffer, requestAddress);
+        
+        // Request a response from the slave to get back result
+        MasterWire.requestResponse(buffer, requestAddress);
+        MasterWire.receiveResponse(buffer);
+
+
       }
-      break;
-
-    case SendRequestToSlave:
-      Serial.println(F("Send request to slave!"));
-      MasterWire.sendRequest(buffer);
-      state = RequestResponseFromSlave;
-      break;
-
-    case RequestResponseFromSlave:
-      Serial.println(F("Request response from slave!"));
-      MasterWire.requestResponse(buffer);
-      state = ReceiveResponseFromSlave;
-      break;
-
-    case ReceiveResponseFromSlave:
-      Serial.println(F("Receieve response from slave!"));
-      MasterWire.receiveResponse(buffer);
+      // Change state back to idle
       state = Idle;
-      for(int i = 0; i < BUFF_SIZE; i++)
-      {
-        Serial.print(i);
-        Serial.print(" - ");
-        Serial.print(buffer[i], HEX);
-        Serial.println("");
-      }
       break;
   }
 }
-

@@ -1,16 +1,20 @@
 #ifndef Configuration_h
 #define Configuration_h
 
+#include <Arduino.h>
 #include <EEPROM.h>
 
 // Definitions
 
-#define DEVICE_NUMBER 16
-#define DESCRIPTION_LENGTH 64
-#define ADDRESS_ID 0
-#define MAX_SLAVE_ADDRESS 1
-#define ADDRESS_DESC 2
-#define ADDRESS_DEVICES DESCRIPTION_LENGTH+ADDRESS_DESC
+#define DEVICE_NUMBER       16  // Maximum number of devices
+#define DESCRIPTION_LENGTH  64  // Maximum size of description
+
+// Definition of 
+
+#define ADDRESS_ID          0
+#define ADDRESS_MAX_SLAVE   1
+#define ADDRESS_DESC        2
+#define ADDRESS_DEVICES     DESCRIPTION_LENGTH+ADDRESS_DESC
 
 // Device Type enum
 enum DeviceType { None, Sensor, Actuator };
@@ -31,6 +35,7 @@ public:
   byte getId();
   bool setId(byte id);
   byte getMaxSlaveAddress();
+  bool setMaxSlaveAddress(byte address);
   char* getDescription();
   bool setDescription(const char* desc);
   DeviceData* getDeviceData();
@@ -46,4 +51,3 @@ private:
 extern Configuration BoardConfiguration;
 
 #endif // Configuration_h
-
