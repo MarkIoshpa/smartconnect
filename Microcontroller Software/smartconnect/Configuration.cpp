@@ -23,6 +23,11 @@ void Configuration::setup()
     tempDeviceData.pinmode = EEPROM.read(ADDRESS_DEVICES + i*3 + 1);
     tempDeviceData.type = (enum DeviceType) EEPROM.read(ADDRESS_DEVICES + i*3 + 2);
     deviceData[i] = tempDeviceData;
+
+    if(deviceData[i].type == DigitalSensor || deviceData[i].type == AnalogSensor)
+    {
+      pinMode(deviceData[i].address, deviceData[i].pinmode);
+    }
   }
 }
 

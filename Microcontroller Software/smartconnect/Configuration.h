@@ -17,7 +17,7 @@
 #define ADDRESS_DEVICES     DESCRIPTION_LENGTH+ADDRESS_DESC
 
 // Device Type enum
-enum DeviceType { None, Sensor, Actuator };
+enum DeviceType { None, DigitalSensor, DigitalActuator, AnalogSensor, AnalogActuator };
 
 // Device Data struct
 
