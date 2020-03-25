@@ -19,7 +19,7 @@
 #define CHECKSUM_ERR  6
 
 // Microcontroller State
-enum State { Idle, Working};
+enum State {Idle, Working};
 
 // Global Variables
 
@@ -28,7 +28,7 @@ Slave SlaveWire = Slave();    // I2C Slave Wire
 byte buffer[BUFF_SIZE];       // Buffer for messages between master and slave
 int requestAddress;           // Address of slave that the message should be sent to
 byte errorByte;               // Error byte when sending request to slave
-state = Idle;                 // Starting state
+enum State state = Idle;      // Starting state
 
 // Setup
 void setup() 
