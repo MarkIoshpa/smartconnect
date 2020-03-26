@@ -13,19 +13,21 @@ bool Root::receiveWorkstationRequest(byte* buffer)
     length = buffer[i];
     i++;
   }
-        
-  // Write to buffer until length
-  while(i < BUFF_SIZE && (Serial.available() > 0))
+  else
   {
-    buffer[i] = Serial.read();
-    i++;
-        
-    if(i == length)
+    // Write to buffer until length
+    while(length > 0 && i < BUFF_SIZE && (Serial.available() > 0))
     {
-        // Reset static variables
-        length = 0;
-        i = 0;
-        return true;
+      buffer[i] = Serial.read();
+      i++;
+          
+      if(i == length)
+      {
+          // Reset static variables
+          length = 0;
+          i = 0;
+          return true;
+      }
     }
   }
 

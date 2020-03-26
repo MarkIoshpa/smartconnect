@@ -30,6 +30,7 @@ byte buffer[BUFF_SIZE];       // Buffer for messages between master and slave
 int requestAddress;           // Address of slave that the message should be sent to
 byte errorByte;               // Error byte when sending request to slave
 enum State state = Idle;      // Starting state
+byte notReady[1] = {0x00};    // Not ready response
 
 // Setup
 void setup() 
@@ -49,7 +50,10 @@ void receiveEvent(int bytes)
 // Slave - Request from master Event
 void requestEvent()
 {
-  SlaveWire.sendResponse(buffer);
+  if(state == Idle)
+    SlaveWire.sendResponse(buffer);
+  else
+    SlaveWire.sendResponse(notReady);
 }
 
 // Execute operation specified in request message
@@ -222,7 +226,7 @@ byte checksum()
 {
   unsigned int sum, i;
   for ( i = 0, sum = 0; i < buffer[PACKAGE_LENGTH_OFFSET]-1; i++)
-      sum += buffer[i];  
+      sum += buffer[i];
   return (byte)(sum%256);
 }
 
@@ -257,6 +261,7 @@ int findNextSlaveAddress()
     buffer[i] = buffer[i+1];
   buffer[PACKAGE_LENGTH_OFFSET] = buffer[PACKAGE_LENGTH_OFFSET] - 1;
   buffer[ADDRESS_LENGTH_OFFSET] = buffer[ADDRESS_LENGTH_OFFSET] - 1;
+  buffer[buffer[PACKAGE_LENGTH_OFFSET]-1] = checksum();
   return buffer[ADDRESS_OFFSET];
 }
 
@@ -288,9 +293,7 @@ void loop()
       {
         // Request slave to perform operation
         requestAddress = findNextSlaveAddress();
-        buffer[buffer[PACKAGE_LENGTH_OFFSET]-1] = checksum();
         errorByte = MasterWire.sendRequest(buffer, requestAddress);
-        
         if(errorByte)
         {
           requestError();
@@ -298,8 +301,10 @@ void loop()
         else
         {
           // Request a response from the slave to get back result
-          MasterWire.requestResponse(buffer, requestAddress);
-          MasterWire.receiveResponse(buffer);
+          do {
+            MasterWire.requestResponse(buffer, requestAddress);
+            MasterWire.receiveResponse(buffer);
+          } while(buffer[PACKAGE_LENGTH_OFFSET] == 0);
 
           // Check if checksum is correct
           checksumError();

@@ -34,6 +34,9 @@ void setup()
   Serial.begin(9600);
   BoardConfiguration.setup();
   MasterWire.setup();
+
+  // Send ready byte
+  Serial.write(0x00);
 }
 
 // Execute operation specified in request message
@@ -243,6 +246,7 @@ int findNextSlaveAddress()
     buffer[i] = buffer[i+1];
   buffer[PACKAGE_LENGTH_OFFSET] = buffer[PACKAGE_LENGTH_OFFSET] - 1;
   buffer[ADDRESS_LENGTH_OFFSET] = buffer[ADDRESS_LENGTH_OFFSET] - 1;
+  buffer[buffer[PACKAGE_LENGTH_OFFSET]-1] = checksum();
   return buffer[ADDRESS_OFFSET];
 }
 
@@ -256,6 +260,7 @@ void loop()
     if(checksumError())
     {
       // Send response back to PC workstation
+      Serial.write(0xDD);
       RootCommunication.sendWorkstationResponse(buffer);
       return;
     }   
@@ -269,9 +274,8 @@ void loop()
     {
       // Request slave to perform operation
       requestAddress = findNextSlaveAddress();
-      buffer[buffer[PACKAGE_LENGTH_OFFSET]-1] = checksum();
       errorByte = MasterWire.sendRequest(buffer, requestAddress);
-      
+
       if(errorByte)
       {
         requestError();
@@ -279,8 +283,10 @@ void loop()
       else
       {
         // Request a response from the slave to get back result
-        MasterWire.requestResponse(buffer, requestAddress);
-        MasterWire.receiveResponse(buffer);
+        do {
+          MasterWire.requestResponse(buffer, requestAddress);
+          MasterWire.receiveResponse(buffer);
+        } while(buffer[PACKAGE_LENGTH_OFFSET] == 0); // poll slave until he's ready
 
         // Check if checksum is correct
         checksumError();
