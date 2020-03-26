@@ -1,3 +1,4 @@
+#include "Root.h"
 #include "Master.h"
 #include "Slave.h"
 
@@ -19,17 +20,13 @@
 #define CHECKSUM_ERR  6
 #define INVALID       7
 
-// Microcontroller State
-enum State {Idle, Working};
-
 // Global Variables
 
-Master MasterWire = Master(); // I2c Master Wire
-Slave SlaveWire = Slave();    // I2C Slave Wire
-byte buffer[BUFF_SIZE];       // Buffer for messages between master and slave
-int requestAddress;           // Address of slave that the message should be sent to
-byte errorByte;               // Error byte when sending request to slave
-enum State state = Idle;      // Starting state
+Root RootCommunication = Root();// Serial Communication with PC workstation
+Master MasterWire = Master();   // I2c Master Wire
+byte buffer[BUFF_SIZE];         // Buffer for messages between master and slave
+int requestAddress;             // Address of slave that the message should be sent to
+byte errorByte;                 // Error byte when sending request to slave
 
 // Setup
 void setup() 
@@ -37,19 +34,6 @@ void setup()
   Serial.begin(9600);
   BoardConfiguration.setup();
   MasterWire.setup();
-  SlaveWire.setup(receiveEvent, requestEvent);
-}
-
-// Slave - Receive from master Event
-void receiveEvent(int bytes) 
-{
-  state = Working;
-}
-
-// Slave - Request from master Event
-void requestEvent()
-{
-  SlaveWire.sendResponse(buffer);
 }
 
 // Execute operation specified in request message
@@ -222,7 +206,9 @@ byte checksum()
 {
   unsigned int sum, i;
   for ( i = 0, sum = 0; i < buffer[PACKAGE_LENGTH_OFFSET]-1; i++)
-      sum += buffer[i];  
+  {
+    sum += buffer[i];  
+  }
   return (byte)(sum%256);
 }
 
@@ -263,50 +249,45 @@ int findNextSlaveAddress()
 // Main Loop
 void loop() 
 {
-  switch(state)
+  // Received a request from a workstation
+  if(RootCommunication.receiveWorkstationRequest(buffer))
   {
-    case Idle:
-      break;
+    // Check if checksum is correct
+    if(checksumError())
+    {
+      // Send response back to PC workstation
+      RootCommunication.sendWorkstationResponse(buffer);
+      return;
+    }   
 
-    case Working:
-      // Received a request from a master
-      SlaveWire.receiveRequest(buffer);
-
-      // Check if checksum is correct
-      if(checksumError())
+    if(buffer[ADDRESS_LENGTH_OFFSET] == 1) // Operation designated for this microcontroller
+    {
+      // Execute operation and wait until master requests to send result
+      executeOperation();
+    }
+    else  // Operation designated for a microcontroller lower in the hierarchy
+    {
+      // Request slave to perform operation
+      requestAddress = findNextSlaveAddress();
+      buffer[buffer[PACKAGE_LENGTH_OFFSET]-1] = checksum();
+      errorByte = MasterWire.sendRequest(buffer, requestAddress);
+      
+      if(errorByte)
       {
-        state = Idle;
-        break;
-      }   
-
-      if(buffer[ADDRESS_LENGTH_OFFSET] == 1) // Operation designated for this microcontroller
-      {
-        // Execute operation and wait until master requests to send result
-        executeOperation();
+        requestError();
       }
-      else  // Operation designated for a microcontroller lower in the hierarchy
+      else
       {
-        // Request slave to perform operation
-        requestAddress = findNextSlaveAddress();
-        buffer[buffer[PACKAGE_LENGTH_OFFSET]-1] = checksum();
-        errorByte = MasterWire.sendRequest(buffer, requestAddress);
-        
-        if(errorByte)
-        {
-          requestError();
-        }
-        else
-        {
-          // Request a response from the slave to get back result
-          MasterWire.requestResponse(buffer, requestAddress);
-          MasterWire.receiveResponse(buffer);
+        // Request a response from the slave to get back result
+        MasterWire.requestResponse(buffer, requestAddress);
+        MasterWire.receiveResponse(buffer);
 
-          // Check if checksum is correct
-          checksumError();
-        }
+        // Check if checksum is correct
+        checksumError();
       }
-      // Change state back to idle
-      state = Idle;
-      break;
+    }
+
+    // Send response back to PC workstation
+    RootCommunication.sendWorkstationResponse(buffer);
   }
 }
