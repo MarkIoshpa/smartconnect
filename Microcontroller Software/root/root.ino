@@ -18,7 +18,7 @@
 #define OTHER         4
 #define FAILED        5
 #define CHECKSUM_ERR  6
-#define INVALID       7
+#define INVALID_OP    7
 
 // Global Variables
 
@@ -62,7 +62,7 @@ void executeOperation()
     break;
   
   default:
-    errorByte = INVALID;
+    errorByte = INVALID_OP;
     requestError();
     break;
   }
@@ -71,24 +71,35 @@ void executeOperation()
 // Operation for reading configuration data, prepares response buffer
 void getConfigData()
 {
-  int i;
+  int i, j, descLength, devicesLength, deviceOffset;
 
   buffer[COMPLETECODE_OFFSET] = SUCCESS;
-  buffer[DATA_LENGTH_OFFSET] = 2 + DESCRIPTION_LENGTH + DEVICE_NUMBER*3;
-  buffer[PACKAGE_LENGTH_OFFSET] = 4 + buffer[DATA_LENGTH_OFFSET]; // 4 bytes for checksum data length, completion code and package length.
   buffer[DATA_OFFSET + ADDRESS_ID] = BoardConfiguration.getId();
   buffer[DATA_OFFSET + ADDRESS_MAX_SLAVE] = BoardConfiguration.getMaxSlaveAddress();
   
-  for(i = 0; i < DESCRIPTION_LENGTH; i++)
-    buffer[DATA_OFFSET+ADDRESS_DESC+i] = (BoardConfiguration.getDescription())[i];
+  for(i = 0; i < DESCRIPTION_LENGTH && (BoardConfiguration.getDescription())[i] != 0; i++)
+    buffer[DATA_OFFSET+ADDRESS_DESC+i+1] = (BoardConfiguration.getDescription())[i];
+
+  descLength = i;
+  buffer[DATA_OFFSET+ADDRESS_DESC] = descLength;
+  deviceOffset = DATA_OFFSET+descLength+3;
   
-  for(i = 0; i < DEVICE_NUMBER; i++)
+  for(i = 0, j = 0; i < DEVICE_NUMBER; i++)
   {
-    buffer[DATA_OFFSET+DESCRIPTION_LENGTH+i*3] = (BoardConfiguration.getDeviceData())[i].address;
-    buffer[DATA_OFFSET+DESCRIPTION_LENGTH+i*3+1] = (BoardConfiguration.getDeviceData())[i].pinmode;
-    buffer[DATA_OFFSET+DESCRIPTION_LENGTH+i*3+2] = (BoardConfiguration.getDeviceData())[i].type;
+    if((BoardConfiguration.getDeviceData())[i].type != None)
+    {
+      buffer[deviceOffset+j*3+1] = (BoardConfiguration.getDeviceData())[i].address;
+      buffer[deviceOffset+j*3+2] = (BoardConfiguration.getDeviceData())[i].pinmode;
+      buffer[deviceOffset+j*3+3] = (BoardConfiguration.getDeviceData())[i].type;
+      j++;
+    }
   }
 
+  devicesLength = j*3;
+  buffer[deviceOffset] = devicesLength;
+
+  buffer[DATA_LENGTH_OFFSET] = 4 + descLength + devicesLength;
+  buffer[PACKAGE_LENGTH_OFFSET] = 4 + buffer[DATA_LENGTH_OFFSET]; // 4 bytes for checksum data length, completion code and package length.
   buffer[buffer[PACKAGE_LENGTH_OFFSET]-1] = checksum();
 }
 
@@ -260,14 +271,12 @@ void loop()
     if(checksumError())
     {
       // Send response back to PC workstation
-      Serial.write(0xDD);
       RootCommunication.sendWorkstationResponse(buffer);
       return;
     }   
 
     if(buffer[ADDRESS_LENGTH_OFFSET] == 1) // Operation designated for this microcontroller
     {
-      // Execute operation and wait until master requests to send result
       executeOperation();
     }
     else  // Operation designated for a microcontroller lower in the hierarchy

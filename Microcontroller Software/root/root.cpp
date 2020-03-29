@@ -1,4 +1,4 @@
-#include "root.h"
+#include "Root.h"
 
 // Receives serial input from workstation, and writes it to buffer
 // Returns true if workstation finishes sending message, else returns false
