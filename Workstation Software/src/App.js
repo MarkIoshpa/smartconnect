@@ -1,26 +1,52 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import TreeArduino from './components/tree';
+import Nav from './components/Navigation';
+import Statistics from './components/statistics'
+import consts from './consts';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends React.Component{
+  constructor(props) {
+    super(props)
+    this.renderSelectedPage = this.renderSelectedPage.bind(this)
+    this.handleChangePage = this.handleChangePage.bind(this)
+    this.state = {
+      page: consts.PAGE_SYSTEM_VIEW_TREE
+    }
+  }
+
+  renderSelectedPage() {
+    switch (this.state.page) {
+      case consts.PAGE_SYSTEM_VIEW_TREE:
+        return <TreeArduino />
+
+      case consts.PAGE_SYSTEM_VIEW_LIST:
+        return // add list view component here
+
+      case consts.PAGE_STATISTICS:
+        return <Statistics />
+
+      case consts.PAGE_HISTORY:
+        return // add history component here
+
+      default:
+        break;
+    }
+  }
+
+  handleChangePage(newPage) {
+    this.setState({page : newPage});
+  }
+
+  render() {
+    return (
+      <div className="App">
+        <Nav currentPage = {this.state.page} handleChangePage = {this.handleChangePage}/>
+        { this.renderSelectedPage() }
+      </div>
+    );
+  }
+
 }
 
 export default App;

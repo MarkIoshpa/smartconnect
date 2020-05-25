@@ -108,7 +108,6 @@ class statistics extends React.Component{
     
   return (
     <div>
-      <Nav/>
       {
         this.state.loaded &&
         <div>

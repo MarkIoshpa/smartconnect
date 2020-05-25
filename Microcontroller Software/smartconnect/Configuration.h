@@ -24,7 +24,6 @@ enum DeviceType { None, DigitalSensor, DigitalActuator, AnalogSensor, AnalogActu
 struct DeviceData
 {
   byte address;
-  byte pinmode;
   enum DeviceType type;
 };
 

@@ -1,75 +1,113 @@
 /* The navigation menu */
 .navbar {
-  overflow: hidden;
+  margin: 2px;
+  height: 50px;
   background-color: white;
+  -webkit-app-region: drag;
+}
+
+.logo {
+  cursor: pointer;
+}
+
+.logo img {
+  margin-top: -10px;
+  margin-left: -10px;
+}
+
+.logo h1 {
+  float: left;
+  font-size: 16px;
+  color: #52a6b8;
+  margin-top: 15px;
+  margin-left: -12px;
+  margin-right: 12px;
 }
 
 /* Navigation links */
-.navbar a {
+.menu button {
+  cursor: pointer;
+  -webkit-app-region: no-drag;
   float: left;
+  min-width: 80px;
+  height: 50px; 
   font-size: 16px;
   color: black;
   text-align: center;
   padding: 14px 16px;
   text-decoration: none;
-}
-
-.navbar img {
-  float: left;
-  font-size: 16px;
-  color: black;
-  text-align: center;
-  padding: 14px 16px;
-  text-decoration: none;
-}
-
-/* The subnavigation menu */
-.subnav {
-  float: left;
-  overflow: hidden;
-}
-
-/* Subnav button */
-.subnav .subnavbtn {
-  font-size: 16px;
   border: none;
   outline: none;
-  color: black;
-  padding: 14px 16px;
   background-color: inherit;
   font-family: inherit;
-  margin: 0;
 }
 
+.menu img {
+  float: left;
+  font-size: 16px;
+  color: black;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
 
-/* Add a red background color to navigation links on hover */
-.navbar a:hover, .subnav:hover .subnavbtn {
+.menu button:hover, .menu li:hover{
   color:#3498DB;
 }
 
-/* Style the subnav content - positioned absolute */
-.subnav-content {
+.dropdown {
+  float: left;
+  position: relative;
+}
+
+.dropdown-content {
   display: none;
   position: absolute;
-  left: 0;
-  background-color:white;
-  width: 100%;
+  top: 40px;
+  background-color: inherit;
+  min-width: 120px;
   z-index: 1;
+  padding: 0;
+  margin: 0;
 }
 
-/* Style the subnav links */
-.subnav-content a {
-  float: left;
-  color: white;
+.dropdown-content li {
+  cursor: pointer;
+  list-style-type: none;
+  padding: 12px 16px;
   text-decoration: none;
-}
-
-/* Add a grey background color on hover */
-.subnav-content a:hover {
-  color: black;
-}
-
-/* When you move the mouse over the subnav container, open the subnav content */
-.subnav:hover .subnav-content {
   display: block;
 }
+
+.dropdown-content li:hover {background-color: #f1f1f1;}
+
+.dropdown:hover .dropdown-content {display: block;}
+
+.dropdown:hover .dropbtn {color:#3498DB;} 
+
+.window-nav {
+  position: absolute;
+  right: 10px;
+}
+
+.window-nav button {
+  -webkit-app-region: no-drag;
+  cursor: pointer;
+  float: right;
+  margin-top: 10px;
+  margin-right: 4px;
+  margin-left: 4px;
+  text-decoration: none;
+  border: none;
+  outline: none;
+  width: 25px;
+  height: 25px;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-color: transparent;
+}
+
+.window-nav button:hover {transform: scale(1.04);}
+
+.window-nav button:first-child:hover {transform: scale(1.04); background-color: red;}
+

@@ -1,5 +1,6 @@
 #include "Master.h"
 #include "Slave.h"
+#include <avr/wdt.h>
 
 // Operation Code Definitions
 
@@ -31,6 +32,7 @@ int requestAddress;           // Address of slave that the message should be sen
 byte errorByte;               // Error byte when sending request to slave
 enum State state = Idle;      // Starting state
 byte notReady[1] = {0x00};    // Not ready response
+unsigned long startTime = 0;  // Loop start time
 
 // Setup
 void setup() 
@@ -39,6 +41,7 @@ void setup()
   BoardConfiguration.setup();
   MasterWire.setup();
   SlaveWire.setup(receiveEvent, requestEvent);
+  wdt_enable(WDTO_8S);
 }
 
 // Slave - Receive from master Event
@@ -71,7 +74,7 @@ void executeOperation()
     break;
 
   case READ_DEVICE:
-    readDevice();
+    readDevices();
     break;
 
   case WRITE_DEVICE:
@@ -105,14 +108,13 @@ void getConfigData()
   {
     if((BoardConfiguration.getDeviceData())[i].type != None)
     {
-      buffer[deviceOffset+j*3+1] = (BoardConfiguration.getDeviceData())[i].address;
-      buffer[deviceOffset+j*3+2] = (BoardConfiguration.getDeviceData())[i].pinmode;
-      buffer[deviceOffset+j*3+3] = (BoardConfiguration.getDeviceData())[i].type;
+      buffer[deviceOffset+j*2+1] = (BoardConfiguration.getDeviceData())[i].address;
+      buffer[deviceOffset+j*2+2] = (BoardConfiguration.getDeviceData())[i].type;
       j++;
     }
   }
 
-  devicesLength = j*3;
+  devicesLength = j*2;
   buffer[deviceOffset] = devicesLength;
 
   buffer[DATA_LENGTH_OFFSET] = 4 + descLength + devicesLength;
@@ -143,14 +145,18 @@ void setConfigData()
     case 2:
       DeviceData temp;
       temp.address = buffer[configDataOffset + 1];
-      temp.pinmode = buffer[configDataOffset + 2];
-      temp.type = (DeviceType) buffer[configDataOffset + 3];
+      temp.type = (DeviceType) buffer[configDataOffset + 2];
       error = BoardConfiguration.setDeviceDataElement(temp, temp.address);
 
       // Set pinmode for new device if necessary
-      if(temp.type == DigitalSensor || temp.type == AnalogSensor)
+      if(temp.type == DigitalSensor)
       {
-        pinMode(temp.address, temp.pinmode);
+        pinMode(temp.address, INPUT);
+      }
+
+      if(temp.type == DigitalActuator)
+      {
+        pinMode(temp.address, OUTPUT);
       }
       break;
   }
@@ -165,38 +171,46 @@ void setConfigData()
   buffer[buffer[PACKAGE_LENGTH_OFFSET]-1] = checksum();
 }
 
-// Operation for reading data from sensor, prepares response buffer with data
-void readDevice()
+// Operation for reading data from all sensors, prepares response buffer with data
+void readDevices()
 {
-  byte deviceAddressOffset = buffer[PACKAGE_LENGTH_OFFSET] - 2;
-  enum DeviceType type = BoardConfiguration.getDeviceData()[buffer[deviceAddressOffset]].type;
-  int result;
+  enum DeviceType type;
+  int result, i, j;
+  unsigned long executeTime;
 
-  switch (type)
+  for(i = 0, j = 0; i < DEVICE_NUMBER; i++)
   {
-  case DigitalSensor:
-    buffer[COMPLETECODE_OFFSET] = SUCCESS;
-    buffer[PACKAGE_LENGTH_OFFSET] = 5;
-    buffer[DATA_LENGTH_OFFSET] = 1;
-    buffer[DATA_OFFSET] = digitalRead(buffer[deviceAddressOffset]);
-    break;
+    type = BoardConfiguration.getDeviceData()[i].type;
 
-  case AnalogSensor:
-    result = analogRead(buffer[deviceAddressOffset]);
-    buffer[COMPLETECODE_OFFSET] = SUCCESS;
-    buffer[PACKAGE_LENGTH_OFFSET] = 6;
-    buffer[DATA_LENGTH_OFFSET] = 2;
-    buffer[DATA_OFFSET] = (byte)result;           // 1st byte of result
-    buffer[DATA_OFFSET+1] = (byte)(result >> 8);  // 2nd byte of result
-    break;
-  
-  default:
-    buffer[PACKAGE_LENGTH_OFFSET] = 4;
-    buffer[COMPLETECODE_OFFSET] = FAILED;
-    buffer[DATA_LENGTH_OFFSET] = 0;
-    break;
+    switch (type)
+    {
+    case DigitalActuator:
+    case DigitalSensor:
+      buffer[DATA_OFFSET+j*2] = digitalRead(i);
+      buffer[DATA_OFFSET+1+j*2] = 0;
+      j++;
+      break;
+
+    case AnalogActuator:
+    case AnalogSensor:
+      result = analogRead(i);
+      buffer[DATA_OFFSET+j*2] = (byte)result;           // 1st byte of result
+      buffer[DATA_OFFSET+1+j*2] = (byte)(result >> 8);  // 2nd byte of result
+      j++; 
+      break;
+    
+    default:
+      continue;
+      break;
+    }
   }
   
+  buffer[COMPLETECODE_OFFSET] = SUCCESS;
+  buffer[PACKAGE_LENGTH_OFFSET] = 8+j*2;
+  buffer[DATA_LENGTH_OFFSET] = j*2;
+  executeTime = micros() - startTime;
+  for(int k = 0; k < 4; k++)
+    buffer[buffer[PACKAGE_LENGTH_OFFSET]-1-(4-k)] = executeTime >> k*8; // 4 bytes for unsigned long
   buffer[buffer[PACKAGE_LENGTH_OFFSET]-1] = checksum();
 }
 
@@ -204,8 +218,8 @@ void readDevice()
 void writeDevice()
 {
   byte deviceAddressOffset = ADDRESS_OFFSET + 1;
-  int value1 = buffer[buffer[PACKAGE_LENGTH_OFFSET]-2];
-  int value2 = buffer[buffer[PACKAGE_LENGTH_OFFSET]-1];
+  int value1 = buffer[buffer[PACKAGE_LENGTH_OFFSET]-3];
+  int value2 = buffer[buffer[PACKAGE_LENGTH_OFFSET]-2];
   int value = value1 + (value2 << 8);
   enum DeviceType type = BoardConfiguration.getDeviceData()[buffer[deviceAddressOffset]].type;
   int result;
@@ -279,6 +293,8 @@ int findNextSlaveAddress()
 // Main Loop
 void loop() 
 {
+  startTime = micros();
+  wdt_reset();
   switch(state)
   {
     case Idle:

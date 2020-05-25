@@ -71,7 +71,6 @@ class TreeArduino extends React.Component{
   render() {
   return (
     <div>
-      <Nav></Nav>
       {
         this.state.loaded &&
         <div>

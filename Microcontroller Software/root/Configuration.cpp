@@ -19,14 +19,18 @@ void Configuration::setup()
   // Load Device Data from EEPROM
   for(i = 0; i < DEVICE_NUMBER; i++)
   {
-    tempDeviceData.address = EEPROM.read(ADDRESS_DEVICES + i*3);
-    tempDeviceData.pinmode = EEPROM.read(ADDRESS_DEVICES + i*3 + 1);
-    tempDeviceData.type = (enum DeviceType) EEPROM.read(ADDRESS_DEVICES + i*3 + 2);
+    tempDeviceData.address = EEPROM.read(ADDRESS_DEVICES + i*2);
+    tempDeviceData.type = (enum DeviceType) EEPROM.read(ADDRESS_DEVICES + i*2 + 1);
     deviceData[i] = tempDeviceData;
 
-    if(deviceData[i].type == DigitalSensor || deviceData[i].type == AnalogSensor)
+    if(deviceData[i].type == DigitalSensor)
     {
-      pinMode(deviceData[i].address, deviceData[i].pinmode);
+      pinMode(deviceData[i].address, INPUT);
+    }
+
+    if(deviceData[i].type == DigitalActuator)
+    {
+      pinMode(deviceData[i].address, OUTPUT);
     }
   }
 }
@@ -106,9 +110,8 @@ bool Configuration::setDeviceDataElement(DeviceData data, int index)
   deviceData[index] = data;
 
   // Write devicedata to EEPROM
-  EEPROM.write(ADDRESS_DEVICES + index*3, deviceData[index].address);
-  EEPROM.write(ADDRESS_DEVICES + index*3 + 1, deviceData[index].pinmode);
-  EEPROM.write(ADDRESS_DEVICES + index*3 + 2, deviceData[index].type);
+  EEPROM.write(ADDRESS_DEVICES + index*2, deviceData[index].address);
+  EEPROM.write(ADDRESS_DEVICES + index*2 + 1, deviceData[index].type);
 
   return true;
 }

@@ -1,4 +1,10 @@
 module.exports = Object.freeze({
+    // Navigation pages
+    PAGE_SYSTEM_VIEW_TREE : "SystemViewTree",
+    PAGE_SYSTEM_VIEW_LIST : "SystemViewList",
+    PAGE_HISTORY: "History",
+    PAGE_STATISTICS: "Statistics",
+    // COM Port
     COM_PORT : "COM5",
     // Operation Code
     GET_CONFIGURATION : 1,

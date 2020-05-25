@@ -14,8 +14,10 @@ let mainWindow;
 function createWindow() {
     // Create the browser window.
     mainWindow = new BrowserWindow({
-        width: 800,
-        height: 800,
+        width: 1000,
+        height: 1000,
+        frame: false,
+        icon: __dirname + '/public/logo.png',
         webPreferences: {
             nodeIntegration: true,
             webSecurity: false
