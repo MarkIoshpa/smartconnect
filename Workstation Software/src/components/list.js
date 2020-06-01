@@ -1,30 +1,16 @@
 import React from 'react';
-import './tree.css';
-import Tree, { withStyles } from 'react-vertical-tree'
+import './list.css';
 import Information from './infoArduino';
+import Tree from 'react-animated-tree'
 
-const styles = {
-  lines: {
-    color: '#BC3D23',
-    height: '75px',
-  },
-  node: {
-    backgroundColor: '#6CB4C3',
-  },
-  text: {
-    color: '#F0F0F0'
-  }
-}
-
-const StyledTree = withStyles(styles)(Tree)
-
-class TreeArduino extends React.Component{
+class ListArduino extends React.Component{
   constructor(props){
     super(props)
     this.handleInfoReturn = this.handleInfoReturn.bind(this)
+    this.buildList = this.buildList.bind(this)
     this.state ={ 
       display : null,
-      Data: []
+      Data:[] ,
     }
   }
 
@@ -40,16 +26,22 @@ class TreeArduino extends React.Component{
   handleInfoReturn() {
     this.setState({display: null})
   }
+
+  buildList(node, key='list') {
+    return (<Tree key={key} open content={node.name}> { node.children.map((child, i) => this.buildList(child, `${key} ${i}`))}</Tree>)
+  }
   
   render() {
   return (
-    <div className='system-view'>
-      <section ></section>
-      <h1>System View - Configuration Tree</h1>
-      <div className='config-tree'>
-        <StyledTree data={this.state.Data} direction
-        onClick={ item => this.setState({display: item.microcontroller})}
-        />
+    <div className='list'>
+      <div>
+        <button style = {{position: 'absolute', left: '50px', 'bottom' : '50px'}} onClick={this.getConfiguration}>
+          Refresh
+        </button>
+        {
+          this.state.Data.length > 0 &&
+          <div>{this.buildList(this.state.Data[0])}</div>
+        }
       </div>
       {
         this.state.display !== null &&
@@ -59,7 +51,7 @@ class TreeArduino extends React.Component{
   )}
 }
 
-export default TreeArduino;
+export default ListArduino;
 
 
    

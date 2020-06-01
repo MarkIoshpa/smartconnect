@@ -6,6 +6,7 @@ import minimize from '../assets/minimize-window.png';
 import maximize from '../assets/maximize-window.png';
 import consts from '../consts';
 const { BrowserWindow } = window.require('electron').remote;
+var maximized = false;
 
 class Nav extends React.Component {
   render() {
@@ -27,11 +28,23 @@ class Nav extends React.Component {
 
           <button onClick={() => this.props.handleChangePage(consts.PAGE_STATISTICS)}>Statistics</button>
           <button onClick={() => this.props.handleChangePage(consts.PAGE_HISTORY)}>History</button>
+          <button onClick={() => this.props.handleChangePage(consts.PAGE_PLANNER)}>Planner</button>
         </div>
 
         <div className="window-nav">
           <button id="close-btn" onClick={() => BrowserWindow.getFocusedWindow().close()} style={{backgroundImage: "url(" + close + ")"}}/>
-          <button id="max-btn" onClick={() => BrowserWindow.getFocusedWindow().maximize()} style={{backgroundImage: "url(" + maximize + ")"}}/>
+          <button id="max-btn" 
+            onClick={() => {
+              if(maximized) {
+                BrowserWindow.getFocusedWindow().unmaximize()
+                maximized = false
+              }
+              else {
+                BrowserWindow.getFocusedWindow().maximize()
+                maximized = true
+              }
+            }} 
+            style={{backgroundImage: "url(" + maximize + ")"}}/>
           <button id="min-btn" onClick={() => BrowserWindow.getFocusedWindow().minimize()} style={{backgroundImage: "url(" + minimize + ")"}}/>
         </div>
       </div>

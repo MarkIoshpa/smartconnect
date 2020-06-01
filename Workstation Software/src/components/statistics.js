@@ -2,7 +2,6 @@ import React from 'react';
 import './tree.css';
 import Tree from 'react-vertical-tree'
 import Information  from './infoArduino';
-import Nav from './Navigation';
 
 var { getAllBoardConfiguration, isReady } = window.require('./src/workstation-communication.js')
 

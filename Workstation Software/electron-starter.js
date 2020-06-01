@@ -16,6 +16,8 @@ function createWindow() {
     mainWindow = new BrowserWindow({
         width: 1000,
         height: 1000,
+        minWidth: 800,
+        minHeight: 800,
         frame: false,
         icon: __dirname + '/public/logo.png',
         webPreferences: {
