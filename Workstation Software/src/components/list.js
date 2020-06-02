@@ -3,6 +3,10 @@ import './list.css';
 import Information from './infoArduino';
 import Tree from 'react-animated-tree'
 
+const treeStyles = {
+  fill: '#BC3D23',
+}
+
 class ListArduino extends React.Component{
   constructor(props){
     super(props)
@@ -28,16 +32,27 @@ class ListArduino extends React.Component{
   }
 
   buildList(node, key='list') {
-    return (<Tree key={key} open content={node.name}> { node.children.map((child, i) => this.buildList(child, `${key} ${i}`))}</Tree>)
+    return (
+      <Tree 
+        style={treeStyles} 
+        key={key} 
+        open 
+        content={node.name}
+        canHide 
+        visible
+        onClick={() => this.setState({display: node.microcontroller})}
+      > 
+        { node.children.map((child, i) => this.buildList(child, `${key} ${i}`))}
+      </Tree>
+    )
   }
   
   render() {
   return (
-    <div className='list'>
-      <div>
-        <button style = {{position: 'absolute', left: '50px', 'bottom' : '50px'}} onClick={this.getConfiguration}>
-          Refresh
-        </button>
+    <div className='list-view'>
+      <section ></section>
+      <h1>System View - Configuration List</h1>
+      <div className='list-content'>
         {
           this.state.Data.length > 0 &&
           <div>{this.buildList(this.state.Data[0])}</div>

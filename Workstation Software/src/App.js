@@ -3,7 +3,6 @@ import './App.css';
 import TreeArduino from './components/tree';
 import ListArduino from './components/list';
 import Nav from './components/Navigation';
-import Statistics from './components/statistics'
 import History from './components/History'
 import consts from './consts';
 import errorDetector from "./components/errorDetector";
@@ -71,9 +70,6 @@ class App extends React.Component{
 
       case consts.PAGE_SYSTEM_VIEW_LIST:
         return <ListArduino data={this.state.data} />
-
-      case consts.PAGE_STATISTICS:
-        return <Statistics data={this.state.data} />
 
       case consts.PAGE_HISTORY:
         return <History rows={this.state.notification} />

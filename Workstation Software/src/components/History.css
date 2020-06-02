@@ -1,3 +1,35 @@
 .history {
-    padding-top: 46px;
+    margin-top: 46px;
+    border-spacing: 0px;
+    border-collapse: collapse;
+}
+
+.history{
+    width: 100%;
+}
+
+.history th {
+    text-align: left;
+    width: 33%;
+    font-family: Saira;
+    font-style: normal;
+    font-weight: 800;
+    font-size: 23px;
+    line-height: 55px;
+    color: #EEE;
+    background-color: #6CB4C3;
+    border: none;
+    margin: 0;
+    padding-left: 10px;
+}
+
+.history td {
+    font-style: normal;
+    font-size: 18px;
+    line-height: 35px;
+    padding-left: 10px;
+}
+
+.history tr:nth-child(2) {
+    background-color: rgb(221, 249, 255);
 }

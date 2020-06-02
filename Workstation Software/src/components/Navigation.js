@@ -26,7 +26,6 @@ class Nav extends React.Component {
             </ul>
           </div> 
 
-          <button onClick={() => this.props.handleChangePage(consts.PAGE_STATISTICS)}>Statistics</button>
           <button onClick={() => this.props.handleChangePage(consts.PAGE_HISTORY)}>History</button>
           <button onClick={() => this.props.handleChangePage(consts.PAGE_PLANNER)}>Planner</button>
         </div>
