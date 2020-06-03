@@ -1,0 +1,47 @@
+.tile {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+}
+
+.placed.tile {
+  position: absolute;
+}
+.enter-sensor{
+  background: url(/pir.png);
+}
+.light-detector{
+  background: url(/light.png);
+}
+.board {
+  background: url(/board.png);
+}
+.audio {
+  background: url(/audio.png);
+}
+
+.Window {
+  background: url(/Window.png);
+}
+.Door {
+  background: url(/Door.png);
+}
+
+.Led {
+  background: url(/Led.png);
+}
+.room-3x3 {
+  background: url(/area.png);
+}
+.room-4x4 {
+  background: url(/area.png);
+}
+.room-5x5 {
+  background: url(/area.png);
+}
+.room-6x6 {
+  background: url(/area.png);
+}

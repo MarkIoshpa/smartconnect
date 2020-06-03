@@ -1,0 +1,56 @@
+.map-builder {
+  position: relative;
+  display: flex;
+}
+
+.map-builder .map {
+  background-image: url(/grid.png);
+}
+
+.map-builder .tiles {
+  flex: 20%;
+  border: 1px solid #acd372;
+  border-left: none;
+}
+
+
+.navBar{
+  position: relative;
+  width: 100%;
+  margin-left: 10px;
+  margin-bottom: 20px;
+}
+.button,.components,.title{
+  position: relative;
+  margin-left: 5px;
+
+}
+.submit{
+  position: relative;
+  margin-left: 10px;
+  margin-top: 25px;
+  width: 200px;
+}
+
+.placed .tooltiptext{
+  visibility: hidden;
+  width: 80px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  margin-left: 22px;
+  opacity: 50%;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+.placed:hover .tooltiptext {
+  visibility: visible;
+}
+
+.empty:hover .tooltiptext{
+  visibility: hidden !important;
+}

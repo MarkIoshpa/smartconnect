@@ -4,24 +4,28 @@ import './info.css'
 import icon from '../assets/icon.png'
 import sensor from '../assets/sensor.png'
 import actuator from '../assets/actuator.png'
+import triangle from '../assets/triangle.png'
+import { Add, Edit } from '@material-ui/icons'
 
 class Information  extends React.Component{
   constructor(props){
     super(props)
     this.typeInput = React.createRef();
     this.addressInput = React.createRef();
-    this.info =this.info.bind(this)
-    this.load =this.load.bind(this)
-    this.addDevice =this.addDevice.bind(this)
-    this.upSensor =this.upSensor.bind(this)
-    this.nullchildren=this.nullchildren.bind(this)
-    this.nulldevices=this.nulldevices.bind(this)
-    this.children=this.children.bind(this)
-    this.devices=this.devices.bind(this)
+    this.descriptionInput = React.createRef();
+    this.info = this.info.bind(this)
+    this.load = this.load.bind(this)
+    this.addDevice = this.addDevice.bind(this)
+    this.changesDesc = this.changesDesc.bind(this)
+    this.upSensor = this.upSensor.bind(this)
+    this.nullchildren = this.nullchildren.bind(this)
+    this.nulldevices = this.nulldevices.bind(this)
+    this.children = this.children.bind(this)
+    this.devices = this.devices.bind(this)
     this.getSensorData = this.getSensorData.bind(this)
     this.setActuatorData = this.setActuatorData.bind(this)
-    this.onSpanClick=this.onSpanClick.bind(this)
-    this.onWindowClick=this.onWindowClick.bind(this)
+    this.onSpanClick = this.onSpanClick.bind(this)
+    this.onWindowClick = this.onWindowClick.bind(this)
     this.getData = false
     this.state = { 
       output : [],
@@ -151,12 +155,12 @@ class Information  extends React.Component{
     this.props.display.getSensorData().then(data =>this.setState({part:data.time}))
 
     if(this.state.part/200<0.51)
-      return<h4 style={{color: 'green'}}> load: {(this.state.part/200*100).toFixed(2)}%</h4>
+      return<h4 className="load" style={{color: 'green'}}> load: {(this.state.part/200*100).toFixed(2)}%</h4>
 
     if(this.state.part/200>0.50&&this.state.part/200<0.76)
-      return<h4 style={{color: 'yellow'}}> load: {(this.state.part/200*100).toFixed(2)}%</h4>
+      return<h4 className="load" style={{color: 'yellow'}}> load: {(this.state.part/200*100).toFixed(2)}%</h4>
 
-    return<h4 style={{color: 'red'}}> load: {(this.state.part/200*100).toFixed(2)}%</h4>
+    return<h4 className="load" style={{color: 'red'}}> load: {(this.state.part/200*100).toFixed(2)}%</h4>
   }
  
 
@@ -177,20 +181,20 @@ class Information  extends React.Component{
   addDevice(){
     return(
       <div>
-      <h5>Add :</h5>
+      <h3>Add New Device:</h3>
       <form name="addSensor">
-        address: <input type="text" ref={this.addressInput}></input> 
+        <label>Pin Address: <input type="text" ref={this.addressInput}></input> </label>
         <br></br>
-        <br></br>
+        <label>Device Type:</label>
         <select ref={this.typeInput}>
             <option value="Digital Sensor">Digital Sensor</option>
             <option value="Digital Actuator">Digital Actuator</option>
-            <option value="Analog Sensor">Digital Actuator</option>
-            <option value="Analog Actuator">Digital Actuator</option>
+            <option value="Analog Sensor">Analog Sensor</option>
+            <option value="Analog Actuator">Analog Actuator</option>
         </select>
         <br></br>
         <br></br>
-        <input type="submit" style={{color:'red'}}  value="✔" onClick={this.upSensor} />
+        <input type="submit" style={{color:'red', float:'right'}}  value="✔" onClick={this.upSensor} />
       </form>
       </div>
     )
@@ -211,28 +215,48 @@ class Information  extends React.Component{
       pinmode:1}
     )
   }
-  
+
+  changesDesc(){
+    return(
+      <div>
+      <h4>Update Description:</h4>
+      <form name="changeDesc">
+        <input type="text" value={this.state.allInfo.desc} ref={this.descriptionInput} maxlength="63"></input>
+        <br></br>
+        <input type="submit" style={{color:'red', float:'right'}}  value="✔" onClick={() => this.props.display.setDevice(this.descriptionInput.current.value)} />
+      </form>
+      </div>
+    )
+  }
+
   render() {
   return (
     <div>
       <div>
         <div id="myModal" className="modal">
           <div className="modal-content">
-          <span className="close">&times;</span>
+            <span className="close">&times;</span>
             <div className="info-icon" style={{backgroundImage: "url(" + icon + ")"}}></div>
             <h2><p>Microcontroller information (id: {this.state.allInfo.id})</p></h2>
-            <h4>Description : {this.state.allInfo.desc}</h4>
-            <h4>Devices: </h4>
+            <h4>Description : {this.state.allInfo.desc}               
+              <Popup trigger={<button><Edit /></button>}>
+                <div>{this.changesDesc()}</div>
+              </Popup>
+            </h4>
+            <h4>Devices: 
+              <Popup trigger={<button><Add /></button>}>
+                <div>{this.addDevice()}</div>
+              </Popup>
+            </h4>
             <div style={{marginLeft: '100px'}}>{(this.nulldevices())}</div>
             <div style={{marginLeft: '100px'}}>{this.state.allInfo.devices.map(this.devices)}</div>
-            <Popup trigger={<button>+</button>} position="right center">
-            <div>{this.addDevice()}</div>
-            </Popup>
+
             <h4>Children:</h4>
             <div style={{marginLeft: '100px'}}>{(this.nullchildren())}</div>
             <div style={{marginLeft: '100px'}}>{this.state.allInfo.children.map(this.children)}</div>
             
             <div>{this.load()}</div>
+            <div className="decoration" style={{backgroundImage: "url(" + triangle + ")"}}></div>
           </div>
         </div>
       </div>

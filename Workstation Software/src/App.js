@@ -1,9 +1,13 @@
 import React from 'react';
 import './App.css';
+import "./tiles.css";
+import Homepage from './components/homepage'
 import TreeArduino from './components/tree';
 import ListArduino from './components/list';
 import Nav from './components/Navigation';
-import History from './components/History'
+import History from './components/History';
+import AdminMapBuilder from "./admin/map-builder";
+import Settings from "./components/settings"
 import consts from './consts';
 import errorDetector from "./components/errorDetector";
 var { getAllBoardConfiguration, isReady } = window.require('./src/workstation-communication.js');
@@ -16,7 +20,7 @@ class App extends React.Component{
     this.handleChangePage = this.handleChangePage.bind(this)
     this.state = {
       data:[],
-      page: consts.PAGE_SYSTEM_VIEW_TREE,
+      page: consts.PAGE_HOMEPAGE,
       notification:[],
       loaded: false
     }
@@ -65,6 +69,9 @@ class App extends React.Component{
 
   renderSelectedPage() {
     switch (this.state.page) {
+      case consts.PAGE_HOMEPAGE:
+        return <Homepage handleChangePage = {this.handleChangePage} />
+
       case consts.PAGE_SYSTEM_VIEW_TREE:
         return <TreeArduino data={this.state.data} />
 
@@ -75,7 +82,10 @@ class App extends React.Component{
         return <History rows={this.state.notification} />
 
       case consts.PAGE_PLANNER:
-        return // add Planner
+        return <AdminMapBuilder />
+
+      case consts.PAGE_SETTINGS:
+        return <Settings />
 
       default:
         break;

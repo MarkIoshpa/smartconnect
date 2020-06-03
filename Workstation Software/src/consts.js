@@ -3,8 +3,9 @@ module.exports = Object.freeze({
     PAGE_SYSTEM_VIEW_TREE : "SystemViewTree",
     PAGE_SYSTEM_VIEW_LIST : "SystemViewList",
     PAGE_HISTORY: "History",
-    PAGE_STATISTICS: "Statistics",
+    PAGE_HOMEPAGE: "Homepage",
     PAGE_PLANNER: "Planner",
+    PAGE_SETTINGS: "Settings",
     // COM Port
     COM_PORT : "COM5",
     // Operation Code

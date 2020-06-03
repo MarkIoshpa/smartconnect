@@ -1,0 +1,39 @@
+.settings {
+    margin-top: 46px;
+    font-family: Saira;
+    font-style: normal;
+    font-weight: 800;
+    font-size: 25px;
+}
+.settings label {
+    float: left;
+    width: 300px;
+}
+
+.settings input {
+    float: left;
+    width: 100px;
+}
+
+.settings div {
+    width: 100%;
+    height: 40px;
+    margin-left: 50px;
+}
+
+.settings h2 {
+    text-align: left;
+    width: 33%;
+    font-family: Saira;
+    font-style: normal;
+    font-weight: 800;
+    font-size: 32px;
+    line-height: 45px;
+    color: #EEE;
+    background-color: #6CB4C3;
+    border: none;
+    margin: 0;
+    padding-left: 10px;
+    width: 100%;
+    margin-bottom: 30px;
+}

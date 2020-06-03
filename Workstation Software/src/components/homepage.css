@@ -1,0 +1,60 @@
+.homepage {
+    margin-top: 46px;
+    width: 100%;
+    height: 100%;
+    background-repeat: no-repeat;
+    background-size: cover;
+    text-align: center;
+}
+
+.homepage section {
+    position: fixed;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.2624) 41%, rgba(204, 193, 191, 0) 47.41%, rgba(136, 49, 181, 0.41) 76.94%);
+    pointer-events: none;
+}
+
+.homepage div {
+    display: inline-block;
+    margin-top: 8px;
+}
+
+.homepage button {
+    background: conic-gradient(from 27.54deg at 50% 61.76%, #3C6A73 -108.24deg, #6CB4C3 62.54deg, #CCC1BF 216.3deg, #3C6A73 251.76deg, #6CB4C3 422.54deg);
+    box-shadow: -5px 4px 4px rgba(0, 0, 0, 0.25),0px 4px 4px rgba(0, 0, 0, 0.25);
+    border-radius: 101px;
+    border: solid 0;
+    font-family: Saira;
+    font-style: normal;
+    font-weight: 800;
+    font-size: 30px;
+    line-height: 76px;
+    color: #FFF;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    cursor: pointer;
+    outline: none;
+}
+
+.homepage button:active {
+    margin: 1px;
+    margin-left: 2px;
+}
+
+.homepage h1 {
+    float: left;
+    text-align: center;
+    margin-top: 322px;
+    width: 100%;
+    font-family: Saira;
+    font-style: normal;
+    font-weight: 800;
+    font-size: 75px;
+    line-height: 55px;
+    color: #FFF;
+    text-shadow: 5px 4px 6px rgba(0, 0, 0, 0.55);
+}

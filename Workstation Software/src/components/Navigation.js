@@ -15,8 +15,8 @@ class Nav extends React.Component {
         <div className="draggable"></div>
         <div className="menu">
           <div className="logo">
-            <img  src={logo} alt="Smart connect" height="45" width="45"></img>
-            <h1>Smart Connect</h1>
+            <img onClick={() => this.props.handleChangePage(consts.PAGE_HOMEPAGE)} src={logo} alt="Smart connect" height="45" width="45"></img>
+            <h1 onClick={() => this.props.handleChangePage(consts.PAGE_HOMEPAGE)}>Smart Connect</h1>
           </div>
           <div className="dropdown">
             <button className="dropbtn">System View</button>
@@ -28,6 +28,7 @@ class Nav extends React.Component {
 
           <button onClick={() => this.props.handleChangePage(consts.PAGE_HISTORY)}>History</button>
           <button onClick={() => this.props.handleChangePage(consts.PAGE_PLANNER)}>Planner</button>
+          <button onClick={() => this.props.handleChangePage(consts.PAGE_SETTINGS)}>Settings</button>
         </div>
 
         <div className="window-nav">
