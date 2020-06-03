@@ -37,7 +37,7 @@ const MAP_SIZE = {
   width: SIZE * 20,
   height: SIZE * 14
 };
-const defaultTiles = [];
+var defaultTiles = [];
 for (let i = 0; i < MAP_SIZE.height / SIZE; i++) {
   for (let j = 0; j < MAP_SIZE.width / SIZE; j++) {
     defaultTiles.push({
@@ -64,6 +64,11 @@ export default function AdminMapBuilder() {
   const [count,setCount]=useState(0);
   const forceUpdate = useForceUpdate();
   useEffect(()=>{
+    if(JSON.parse(localStorage.getItem("position")) === null) {
+      localStorage.setItem("lines",JSON.stringify(lines));
+      localStorage.setItem("position",JSON.stringify(placedTiles));
+      localStorage.setItem("room",JSON.stringify(roomLines))
+    }
     setPlacedTiles(JSON.parse(localStorage.getItem("position")));
     let x=lines;
     let line=JSON.parse(localStorage.getItem("lines"));
@@ -356,7 +361,7 @@ export default function AdminMapBuilder() {
       }
     ])
   }
-  return <div className="map-builder">
+  return <div className="map-builder" style={{marginTop: "46px"}}>
     <div
         onDragOver={e => e.preventDefault()}
         onDrop={handleDrop}
