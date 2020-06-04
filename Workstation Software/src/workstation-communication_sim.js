@@ -2,10 +2,10 @@ const SerialPort = require('serialport')
 const Mutex = require('async-mutex').Mutex;
 const consts = require('./consts')
 
-var serialPort = new SerialPort(consts.COM_PORT, {baudRate: 9600})
+//var serialPort = new SerialPort(consts.COM_PORT, {baudRate: 9600})
 const mutex = new Mutex();
 var ready = false
-serialPort.setMaxListeners(0)
+//serialPort.setMaxListeners(0)
 
 
 class Microcontroller {
@@ -94,12 +94,14 @@ class Microcontroller {
     }
 }
 
-serialPort.on('data', function(data) {
-    if(!ready)
-    {
-        ready = true
-    }
-})
+
+ready = true
+// serialPort.on('data', function(data) {
+//     if(!ready)
+//     {
+//         ready = true
+//     }
+// })
 
 async function getConfiguration(path) {
     return await sendMessage(consts.GET_CONFIGURATION, path)
@@ -144,46 +146,78 @@ function createMicrocontroller(buffer, path) {
     
     let deviceOffset = consts.DATA_OFFSET+2+descriptionLength+1
     for(let i = 0; i < buffer[deviceOffset]; i+=2)
-        devices.push({ id: buffer[deviceOffset+i+1], type: buffer[deviceOffset+i+2]})
+        devices.push({ id: buffer[deviceOffset+1], type: buffer[deviceOffset+2]})
 
     return new Microcontroller(buffer[consts.DATA_OFFSET], buffer[consts.DATA_OFFSET+1], String.fromCharCode(...tmp), path, devices)
 }
 
 var sendMessage = async function(opcode, path, address = -1, data = []) {
     let buffer = initMessage(opcode, path, address, data)
-    if(opcode !== 1 && opcode !== 3) {
-        console.log(path)
-        console.log(buffer)
-    }
-
 
     const release = await mutex.acquire();
     try {
-        serialPort.write(buffer)
-        buffer = Buffer.alloc(0)    
 
-        await new Promise((resolve, reject) => {
-            let length = 0, i = 0
-            serialPort.on('data', (data) => {
-                if(length === 0)
-                    length = data[0]
-
-                buffer = Buffer.concat([buffer, data])
-                if(i >= Math.floor(length / (consts.SERIAL_BUFFER_SIZE+1)))
-                    resolve()
-                i++
-            })
-        })
-
-    } finally {
-        release();
+    await new Promise(r => setTimeout(r, 30));
+  
+    if(JSON.stringify(path) === JSON.stringify([0]) && opcode === 1) {
+        return Buffer.from([32, 0, 28, 9, 12, 22, 77, 97, 115, 116, 101, 114, 32, 109, 105, 99, 114, 111, 99, 111, 110, 116, 114, 111, 108, 108, 101, 114, 2, 14, 3, 100])
     }
 
-    if(opcode !== 1 && opcode !== 3)
-        console.log(buffer)
+    if(JSON.stringify(path) === JSON.stringify([0, 10]) && opcode === 1) {
+        
+        return Buffer.from([38, 0, 34, 10, 12, 28, 77, 97, 115, 116, 101, 114, 45, 83, 108, 97, 118, 101, 32, 109, 105, 99, 114, 111, 99, 111, 110, 116, 114, 111, 108, 108, 101, 114, 2, 3, 2, 147])
+    }
 
+    if(JSON.stringify(path) === JSON.stringify([0, 11]) && opcode === 1) {
+    
+        return Buffer.from([29, 0, 25, 11, 12, 21, 83, 108, 97, 118, 101, 32, 109, 105, 99, 114, 111, 99, 111, 110, 116, 114, 111, 108, 108, 101, 114, 0, 219])
+    }
 
-    return buffer
+    if(opcode === 1) {
+        return Buffer.from([[4, 2, 0, 6]])
+    }
+    
+    if(JSON.stringify(path) === JSON.stringify([0]) && opcode === 3) {
+        return Buffer.from([10, 0, 2, 58, 2, 152, 0, 0, 0, 224])
+    }
+
+    if(JSON.stringify(path) === JSON.stringify([0, 10]) && opcode === 3) {
+        return Buffer.from([10, 0, 2, 0, 0, 64, 0, 0, 0, 76])
+    }
+
+    if(JSON.stringify(path) === JSON.stringify([0, 11]) && opcode === 3) {
+        return Buffer.from([8, 0, 0, 40, 0, 0, 0, 48])
+    }
+
+    return Buffer.from([[4, 0, 0, 4]])
+
+    } finally {
+         release();
+    }
+
+    // const release = await mutex.acquire();
+    // try {
+    //     serialPort.write(buffer)
+    //     buffer = Buffer.alloc(0)    
+
+    //     await new Promise((resolve, reject) => {
+    //         let length = 0, i = 0
+    //         serialPort.on('data', (data) => {
+    //             if(length === 0)
+    //                 length = data[0]
+
+    //             buffer = Buffer.concat([buffer, data])
+    //             if(i >= Math.floor(length / (consts.SERIAL_BUFFER_SIZE+1)))
+    //                 resolve()
+    //             i++
+    //         })
+    //     })
+
+    // } finally {
+    //     release();
+    // }
+
+    // return buffer
 }
 
 function initMessage(opcode, path, address = -1, data = []) {

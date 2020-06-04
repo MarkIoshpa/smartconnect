@@ -16,6 +16,7 @@ class Information  extends React.Component{
     this.info = this.info.bind(this)
     this.load = this.load.bind(this)
     this.addDevice = this.addDevice.bind(this)
+    this.deleteDevice = this.deleteDevice.bind(this)
     this.changesDesc = this.changesDesc.bind(this)
     this.upSensor = this.upSensor.bind(this)
     this.nullchildren = this.nullchildren.bind(this)
@@ -84,23 +85,23 @@ class Information  extends React.Component{
           (this.state.allInfo.devices[i].type === 1 || this.state.allInfo.devices[i].type === 3) &&
           <div>
             <h4>Device Output: <span>{this.state.output[i]}</span></h4>
-            <button className="delete" onClick={()=>this.props.display.setDevice({address:i,type:0,pinmode:0})}><b>🗑️</b></button>
+            <button className="delete" onClick={() => this.deleteDevice(i)}><b>🗑️</b></button>
           </div>
         }
         { 
           (this.state.allInfo.devices[i].type === 2) &&
           <div>
             <h4>Device Status: {this.state.output[i] === 0 ? "OFF" : "ON"}</h4>
-            <button onClick={() => this.setActuatorData(this.state.allInfo.devices[i].id, this.state.output[i] === 0 ? 1 : 0)}>Toggle</button>
-            <button className="delete" onClick={()=>this.props.display.setDevice({address:i,type:0,pinmode:0})}><b>🗑️</b></button>
+            <button onClick={() => this.setActuatorData(this.state.allInfo.devices[i].id, this.state.output[i] === 0 ? 1 : 0, i)}>Toggle</button>
+            <button className="delete" onClick={() => this.deleteDevice(i)}><b>🗑️</b></button>
           </div>
         }
         {
           (this.state.allInfo.devices[i].type === 4) && 
           <div>
             <h4>Device Output: {this.state.output[i]}</h4>
-            <button onClick={() => this.setActuatorData(this.state.allInfo.devices[i].id, 0)}>Toggle</button>
-            <button className="delete" onClick={()=>this.props.display.setDevice({address:i,type:0,pinmode:0})}><b>🗑️</b></button>
+            <button onClick={() => this.setActuatorData(this.state.allInfo.devices[i].id, 0, i)}>Toggle</button>
+            <button className="delete" onClick={() => this.deleteDevice(i)}><b>🗑️</b></button>
           </div>
         }
         <br></br>
@@ -112,12 +113,19 @@ class Information  extends React.Component{
     setInterval(async ()=> {
       let data = await this.props.display.getSensorData()
       this.setState({output: data.array})
+      this.setState({part:data.time})
       }
     ,1000);
   }
 
-  setActuatorData(address, value) {
-    this.props.display.setActuatorData(address, value).then(data=> this.setState({sensor: data}))
+  setActuatorData(address, value, i) {
+
+    this.props.display.setActuatorData(address, value).then(data=> {
+      let tempOutput = this.state.output
+      tempOutput[i] = data;
+      this.setState({output: tempOutput})
+    })
+
     if(this.input === 0)
       this.input = 1
     else
@@ -152,8 +160,6 @@ class Information  extends React.Component{
 
   }
   load(){
-    this.props.display.getSensorData().then(data =>this.setState({part:data.time}))
-
     if(this.state.part/200<0.51)
       return<h4 className="load" style={{color: 'green'}}> load: {(this.state.part/200*100).toFixed(2)}%</h4>
 
@@ -200,30 +206,67 @@ class Information  extends React.Component{
     )
   }
 
+  deleteDevice(i){
+    this.props.display.setDevice({address:this.state.allInfo.devices[i].id,type:0,pinmode:0})
+    let tempInfo = this.state.allInfo
+    tempInfo.devices.splice(i, 1)
+    this.setState({allInfo: tempInfo})
+  }
+
   upSensor(e){
     e.preventDefault()
-    var TypeAddress = {
+    const TypeAddress = {
       "None": 0,
       "Digital Sensor": 1,
       "Digital Actuator" : 2,
       "Analog Sensor" :3,
       "Analog Actuator" :4
     };
+    let address = parseInt(this.addressInput.current.value)
     this.props.display.setDevice({
-      address:parseInt(this.addressInput.current.value),
+      address: address,
       type:TypeAddress[this.typeInput.current.value],
       pinmode:1}
     )
+    
+    let tempInfo = this.state.allInfo
+    let found = false
+    for(let i = 0; i < tempInfo.devices.length; i++) {
+      if(address === tempInfo.devices[i].id) {
+        tempInfo.devices[i] = {
+          id: address,
+          type:TypeAddress[this.typeInput.current.value],
+          pinmode:1
+        }
+        found = true;
+        break;
+      }
+    }
+
+    if(!found) {
+      tempInfo.devices.push({
+        id: address,
+        type:TypeAddress[this.typeInput.current.value],
+        pinmode:1
+      })
+    }
+    tempInfo.devices.sort((a,b) => a.id - b.id)
+    this.setState({allInfo: tempInfo})
   }
 
   changesDesc(){
     return(
       <div>
-      <h4>Update Description:</h4>
+      <h6>Update Description:</h6>
       <form name="changeDesc">
-        <input type="text" value={this.state.allInfo.desc} ref={this.descriptionInput} maxlength="63"></input>
+        <input type="text" value={this.state.allInfo.desc} ref={this.descriptionInput} maxLength="63"></input>
         <br></br>
-        <input type="submit" style={{color:'red', float:'right'}}  value="✔" onClick={() => this.props.display.setDevice(this.descriptionInput.current.value)} />
+        <input type="submit" style={{color:'red', float:'right'}}  value="✔" onClick={() => {
+          this.props.display.setDevice(this.descriptionInput.current.value)
+          let tempInfo = this.state.allInfo
+          tempInfo.desc = this.descriptionInput.current.value
+          this.setState({allInfo: tempInfo})
+        }} />
       </form>
       </div>
     )
