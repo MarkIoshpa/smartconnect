@@ -53,7 +53,7 @@ function useForceUpdate(){
   return () => setValue(value => ++value); // update the state to force render
 }
 
-export default function AdminMapBuilder() {
+export default function AdminMapBuilder(props) {
   const [placedTiles, setPlacedTiles] = useState(defaultTiles);
   const [compButton,setCompButton] = useState("all");
   const [lines,setLines]= useState([]);
@@ -89,9 +89,6 @@ export default function AdminMapBuilder() {
 
 
   },[]);
-  useEffect(()=>{
-    console.log(roomLines)
-  },[roomLines]);
   function sensorToBoard(afterSubmit) {
     let flag=false;
     for (const square in afterSubmit){
@@ -171,8 +168,8 @@ export default function AdminMapBuilder() {
         return
       }
       else {
-        setIcon(oldArray => [...oldArray, "x"])
-        setResult(oldArray => [...oldArray, "board is connected to other board"])
+        setIcon(oldArray => [...oldArray, "x"]);
+        setResult(oldArray => [...oldArray, "board is connected to other board"]);
         return;
       }
     }
@@ -192,8 +189,8 @@ export default function AdminMapBuilder() {
               return
             }
             else {
-              setIcon(oldArray => [...oldArray, "x"])
-              setResult(oldArray => [...oldArray, "you have sensor not connected to board"])
+              setIcon(oldArray => [...oldArray, "x"]);
+              setResult(oldArray => [...oldArray, "you have sensor not connected to board"]);
               return;
             }
 
@@ -346,6 +343,40 @@ export default function AdminMapBuilder() {
 
 
   }
+  let boardCounter=0;
+  let boardhierarchy=[]
+  let boardConnectedToSensor=0
+function scanTree(node) {
+  let arr = Array.from(node)
+  boardCounter++;
+  if(arr[0]){
+    arr[0].children.forEach(child => {
+      scanTree(child)
+    })
+  }
+
+}
+function boardMustBeWithConnection(node){
+	let arr = Array.from(node)
+	sensorLimit+=arr[0]["microcontroller"]["devices"].length>0?1:0
+	if(arr[0]){
+      arr[0].children.forEach(child => {
+        boardMustBeWithConnection(child)
+      })
+    }
+}
+let sensorLimit=0
+  function rule1(node) {
+    let arr = Array.from(node)
+    console.log(arr[0]["microcontroller"]["devices"].length)
+    sensorLimit=arr[0]["microcontroller"]["devices"].length>sensorLimit?arr[0]["microcontroller"]["devices"].length:sensorLimit
+    if(arr[0]){
+      arr[0].children.forEach(child => {
+        rule1(child)
+      })
+    }
+
+  }
   function placeTile(tile, x, y) {
     const snappedX = Math.ceil(x / 32) * 32 - 32;
     const snappedY = Math.ceil((y-42) / 32) * 32 - 32;
@@ -454,8 +485,10 @@ export default function AdminMapBuilder() {
       </div>
       <div>
         <button className="submit" onClick={async () => {
-          setIcon([])
-          setResult([])
+          setIcon([]);
+          setResult([]);
+          scanTree(props.data)
+          console.log(boardCounter)
           let twoDarray = {};
           for (let x = 0; x < 20; x++) {
             for (let y = 0; y < 14; y++) {
@@ -520,16 +553,16 @@ export default function AdminMapBuilder() {
           let flag=true;
           roomFrame.forEach((elem)=> {
             if(flag){
-              flag=false
-              let range = document.getElementsByClassName("Door").length
+              flag=false;
+              let range = document.getElementsByClassName("Door").length;
               for (range--; range >= 0; range--) {
                 if (elem.includes(document.getElementsByClassName("Door")[range].id)) {
                   flag = true
                 }
               }
             }
-          })
-
+          });
+          
           if(!flag && localStorage.getItem("checkedSeven")==="true"){    //rule number 7-door on frame
             setIcon(oldArray => [...oldArray, "x"]);
             setResult(oldArray => [...oldArray, "you have room without door in frame"]);
@@ -596,7 +629,7 @@ export default function AdminMapBuilder() {
           sensorPerRoom.forEach((elem)=>{
             if(!flag4){
               if(elem[0]>1){
-                let num=localStorage.getItem("numOfConnectFour")
+                let num=localStorage.getItem("numOfConnectFour");
               if(elem[1]/elem[0]<num){
                 flag4=true;
                 if(localStorage.getItem("checkedFour")==="true"){
@@ -611,12 +644,12 @@ export default function AdminMapBuilder() {
           //rule number 5-Too little led
           let flag5=false;
           sensorPerRoom.forEach((elem,index)=>{
-            let num=localStorage.getItem("numOfLedFive")
+            let num=localStorage.getItem("numOfLedFive");
             console.log(elem);
             if(!flag5){
             if(elem[3]>0){
               if(elem[3]/room[index].length<1/num**2){
-                flag5=true
+                flag5=true;
                 if(localStorage.getItem("setCheckedFive")==="true"){
                   setIcon(oldArray => [...oldArray, "x"]);
                   setResult(oldArray => [...oldArray, "you dont enough led inside the room"]);
@@ -759,13 +792,30 @@ export default function AdminMapBuilder() {
               setIcon(oldArray => [...oldArray, "x"]);
               setResult(oldArray => [...oldArray, "you have same sensor near each other"]);
             }
-          })
+          });
+          if(boardCounter!==document.getElementsByClassName("board").length-1){
+
+            setIcon(oldArray => [...oldArray, "xx"]);
+            setResult(oldArray => [...oldArray, "The board in the planner and the board in system is not same hierarchy"]);
+            console.log(props.data)
+          }
+           console.log(sensorLimit,parseInt(JSON.parse(localStorage.getItem("limitSensors"))),localStorage.getItem("checkOne"))
+          rule1(props.data)
+          if(sensorLimit>parseInt(JSON.parse(localStorage.getItem("limitSensors")))&& localStorage.getItem("checkOne")==="true"){
+            setIcon(oldArray => [...oldArray, "xx"]);
+            setResult(oldArray => [...oldArray, "too much sensor connected to board in system"]);
+            console.log(props.data)
+          }
+		  boardMustBeWithConnection(props.data)
+		  if(boardConnectedToSensor&& localStorage.getItem("checkTen")==="true"){
+            setIcon(oldArray => [...oldArray, "xx"]);
+            setResult(oldArray => [...oldArray, "you have board without sensor in the system"]);
+            console.log(props.data)
+          }
           setCount(count+1)
         }}>submit
         </button>
         <button className="submit" onClick={()=>{
-          console.log("got to submit")
-          console.log(document.getElementById("1_1").classList)
           localStorage.setItem("lines",JSON.stringify(lines));
           localStorage.setItem("position",JSON.stringify(placedTiles));
           localStorage.setItem("room",JSON.stringify(roomLines))

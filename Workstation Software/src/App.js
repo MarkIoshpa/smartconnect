@@ -104,7 +104,7 @@ class App extends React.Component{
         return <History rows={this.state.notification} />
 
       case consts.PAGE_PLANNER:
-        return <AdminMapBuilder />
+        return <AdminMapBuilder data={this.state.data}/>
 
       case consts.PAGE_SETTINGS:
         return <Settings />
