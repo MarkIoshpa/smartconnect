@@ -80,7 +80,7 @@ class TreeArduino extends React.Component{
   }
 
   scanTree(node){
-    if(this.state.loadTimes[node.id]/configVariables.maxLoadTime>0.75)
+    if(this.state.loadTimes[node.id]/configVariables.maxLoadTime>configVariables.acceptableLoad)
     {
       this.setState({NodeLoad:node.name})
       this.checkload2(node)
@@ -93,8 +93,8 @@ class TreeArduino extends React.Component{
     
     console.log(this.state.loadTimes[node.id])
     var timeNow =this.state.loadTimes[node.id]
-    console.log(timeNow<this.state.minTime&&this.state.loadTimes[node.id]/configVariables.maxLoadTime<0.75)
-    if(node.name!=this.state.newNode&&timeNow<this.state.minTime&&this.state.loadTimes[node.id]/configVariables.maxLoadTime<0.75)
+    console.log(timeNow<this.state.minTime&&this.state.loadTimes[node.id]/configVariables.maxLoadTime<configVariables.acceptableLoad)
+    if(node.name!=this.state.newNode&&timeNow<this.state.minTime&&this.state.loadTimes[node.id]/configVariables.maxLoadTime<configVariables.acceptableLoad)
       {
         this.setState({minTime:this.state.loadTimes[node.id]})
         this.setState({newNode:node.name})
@@ -109,13 +109,11 @@ class TreeArduino extends React.Component{
   }
   checkload2(node){
     this.checkload1(node)
-    if(this.state.newNode!='null')
+    if(this.state.newNode!='null') 
       alert("Load is above acceptable threshold in "+this.state.NodeLoad+".\nIt is recommended to reduce its load by changing some of its devices to "+this.state.newNode)
     if(this.state.newNode=='null'&&!this.state.NodeLoad=='null')
-      alert("add bord to system")
+      alert("It is recommended to add a new board to system to reduce load.")
   }
-
-  
   
   render() {
   return (

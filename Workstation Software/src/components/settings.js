@@ -9,7 +9,8 @@ class Settings extends React.Component {
     this.state = {
       comport: configVariables.comport.substring(3),
       refreshTime: configVariables.refreshTime,
-      maxLoadTime: configVariables.maxLoadTime
+      maxLoadTime: configVariables.maxLoadTime,
+      acceptableLoad: configVariables.acceptableLoad
     }
   }
 
@@ -24,7 +25,7 @@ class Settings extends React.Component {
       <div className="settings">
           <h2>Settings</h2>
           <div>
-            <label for="comport">COMPORT:</label>
+            <label htmlFor="comport">COMPORT:</label>
             <input 
               id="comport" 
               type="number" 
@@ -34,7 +35,7 @@ class Settings extends React.Component {
             </input>
           </div>
           <div>
-            <label for="refresh">Refresh Time (ms):</label>
+            <label htmlFor="refresh">Refresh Time (ms):</label>
             <input 
               id="refresh" 
               type="number" 
@@ -44,12 +45,24 @@ class Settings extends React.Component {
             </input>
           </div>
           <div>
-            <label for="maxload">Max Load Time (ms):</label>
+            <label htmlFor="maxload">Max Load Time (ms):</label>
             <input 
               id="maxload" 
               type="number" 
               defaultValue={this.state.maxLoadTime}
               onChange={(evt) => this.handleChangeSetting(evt.target.value, "maxLoadTime")}
+            >
+            </input>
+          </div>
+          <div>
+            <label htmlFor="acceptableLoad">Acceptable Load (%):</label>
+            <input 
+              id="acceptableLoad" 
+              type="number"
+              min="0"
+              max="100"
+              defaultValue={this.state.acceptableLoad*100}
+              onChange={(evt) => this.handleChangeSetting(evt.target.value/100, "acceptableLoad")}
             >
             </input>
           </div>

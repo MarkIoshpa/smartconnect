@@ -14,5 +14,6 @@ const loadConfigSetting = function(name, defValue) {
 export var configVariables = {
     comport: loadConfigSetting("comport", "COM5"),
     refreshTime: loadConfigSetting("refreshTime", 5000),
-    maxLoadTime: loadConfigSetting("maxLoadTime", 300)
+    maxLoadTime: loadConfigSetting("maxLoadTime", 300),
+    acceptableLoad: loadConfigSetting("acceptableLoad", 0.75)
 }
