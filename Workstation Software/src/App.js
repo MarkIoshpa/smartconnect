@@ -10,6 +10,7 @@ import AdminMapBuilder from "./admin/map-builder";
 import Settings from "./components/settings"
 import consts from './consts';
 import errorDetector from "./components/errorDetector";
+import { configVariables } from "./configVariables"
 var { getAllBoardConfiguration, isReady } = window.require('./src/workstation-communication.js');
 var errorDetect=new errorDetector();
 
@@ -17,12 +18,14 @@ class App extends React.Component{
   constructor(props) {
     super(props)
     this.renderSelectedPage = this.renderSelectedPage.bind(this)
+    this.getTime=this.getTime.bind(this)
     this.handleChangePage = this.handleChangePage.bind(this)
     this.state = {
       data:[],
       page: consts.PAGE_HOMEPAGE,
       notification:[],
-      loaded: false
+      loaded: false,
+      loadTimes:{}
     }
   }
 
@@ -30,10 +33,11 @@ class App extends React.Component{
     setInterval(()=> {
       if(isReady()) {
         this.getConfiguration();
+        this.getTime(this.state.data[0])
         this.setState({notification: errorDetect.notification})
         }
       }
-    ,4000);
+    ,configVariables.refreshTime);
   }
 
   componentWillUnmount() {
@@ -51,10 +55,28 @@ class App extends React.Component{
       )
     })
   }
+  getTime(item){
+    if(item!=null)
+    {
+      item.microcontroller.getSensorData().then(data => {
+        
+        this.setState(prevState => ({
+          loadTimes: {
+            ...prevState.loadTimes,
+            [item.id]: data.time
+          }
+        }))
+      })
+      item.children.forEach(child=>{this.getTime(child)})
+    }
+    else
+      console.log('try')
+  }
 
   addChildren(data, dest) {
     data.forEach(child => {
       let tmp = {};
+      if(child == null) return
       tmp.id = child.id;
       tmp.name = child.desc;
       tmp.microcontroller = child;
@@ -73,7 +95,7 @@ class App extends React.Component{
         return <Homepage handleChangePage = {this.handleChangePage} />
 
       case consts.PAGE_SYSTEM_VIEW_TREE:
-        return <TreeArduino data={this.state.data} />
+        return <TreeArduino data={this.state.data} loadTimes={this.state.loadTimes} />
 
       case consts.PAGE_SYSTEM_VIEW_LIST:
         return <ListArduino data={this.state.data} />

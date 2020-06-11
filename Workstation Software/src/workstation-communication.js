@@ -1,9 +1,11 @@
-const SerialPort = require('serialport')
+const SerialPort = require('serialport');
 const Mutex = require('async-mutex').Mutex;
-const consts = require('./consts')
+const withTimeout = require('async-mutex').withTimeout;
+const consts = require('./consts');
 
-var serialPort = new SerialPort(consts.COM_PORT, {baudRate: 9600})
-const mutex = new Mutex();
+var comport = JSON.parse(localStorage.getItem("comport"))
+var serialPort = new SerialPort(comport, {baudRate: 9600})
+const mutexWithTimeout = withTimeout(new Mutex(), 1000, new Error('timeout'));
 var ready = false
 serialPort.setMaxListeners(0)
 
@@ -101,6 +103,16 @@ serialPort.on('data', function(data) {
     }
 })
 
+serialPort.on('close', function() { 
+    ready = false
+    let interval = setInterval(()=> {
+        serialPort.open()
+        if(ready) {
+            clearInterval(interval)
+        }
+    },1000);
+ })
+
 async function getConfiguration(path) {
     return await sendMessage(consts.GET_CONFIGURATION, path)
 }
@@ -151,37 +163,28 @@ function createMicrocontroller(buffer, path) {
 
 var sendMessage = async function(opcode, path, address = -1, data = []) {
     let buffer = initMessage(opcode, path, address, data)
-    if(opcode !== 1 && opcode !== 3) {
-        console.log(path)
-        console.log(buffer)
-    }
 
+    await mutexWithTimeout
+        .acquire()
+        .then(async (release) => {
+            serialPort.write(buffer)
+            buffer = Buffer.alloc(0)    
 
-    const release = await mutex.acquire();
-    try {
-        serialPort.write(buffer)
-        buffer = Buffer.alloc(0)    
+            await new Promise((resolve, reject) => {
+                let length = 0, i = 0
+                serialPort.on('data', (data) => {
+                    if(length === 0)
+                        length = data[0]
 
-        await new Promise((resolve, reject) => {
-            let length = 0, i = 0
-            serialPort.on('data', (data) => {
-                if(length === 0)
-                    length = data[0]
-
-                buffer = Buffer.concat([buffer, data])
-                if(i >= Math.floor(length / (consts.SERIAL_BUFFER_SIZE+1)))
-                    resolve()
-                i++
+                    buffer = Buffer.concat([buffer, data])
+                    if(i >= Math.floor(length / (consts.SERIAL_BUFFER_SIZE+1)))
+                        resolve()
+                    i++
+                })
             })
-        })
 
-    } finally {
-        release();
-    }
-
-    if(opcode !== 1 && opcode !== 3)
-        console.log(buffer)
-
+            release()
+        }, (error) => buffer = Buffer.from([[4, 8, 0, 12]]))
 
     return buffer
 }

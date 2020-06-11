@@ -28,6 +28,7 @@ class Information  extends React.Component{
     this.onSpanClick = this.onSpanClick.bind(this)
     this.onWindowClick = this.onWindowClick.bind(this)
     this.getData = false
+    this.interval = null
     this.state = { 
       output : [],
       allInfo: {
@@ -49,6 +50,7 @@ class Information  extends React.Component{
 
   componentWillUnmount() {
     this.getData = false
+    clearInterval(this.interval)
   }
 
   devices(item,i){
@@ -110,7 +112,7 @@ class Information  extends React.Component{
   }  
 
   getSensorData() {
-    setInterval(async ()=> {
+    this.interval = setInterval(async ()=> {
       let data = await this.props.display.getSensorData()
       this.setState({output: data.array})
       this.setState({part:data.time})

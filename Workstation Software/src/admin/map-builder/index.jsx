@@ -348,7 +348,7 @@ export default function AdminMapBuilder() {
   }
   function placeTile(tile, x, y) {
     const snappedX = Math.ceil(x / 32) * 32 - 32;
-    const snappedY = Math.ceil(y / 32) * 32 - 32;
+    const snappedY = Math.ceil((y-42) / 32) * 32 - 32;
 
     setPlacedTiles(prevState => [
       ...prevState.filter(
@@ -517,18 +517,24 @@ export default function AdminMapBuilder() {
             roomFrame.push(arr)      //room -each item is room squares  in the planner
           });
 
-          roomFrame.forEach((elem)=>{
-            let flag=false;
-            elem.forEach((square)=>{
-              if(document.getElementById(square).classList[2]==="Door"){
-                flag=true
+          let flag=true;
+          roomFrame.forEach((elem)=> {
+            if(flag){
+              flag=false
+              let range = document.getElementsByClassName("Door").length
+              for (range--; range >= 0; range--) {
+                if (elem.includes(document.getElementsByClassName("Door")[range].id)) {
+                  flag = true
+                }
               }
-            });
-            if(!flag && localStorage.getItem("checkedSeven")==="true"){    //rule number 7-door on frame
-              setIcon(oldArray => [...oldArray, "x"]);
-              setResult(oldArray => [...oldArray, "you have room without door in frame"]);
             }
-          });
+          })
+
+          if(!flag && localStorage.getItem("checkedSeven")==="true"){    //rule number 7-door on frame
+            setIcon(oldArray => [...oldArray, "x"]);
+            setResult(oldArray => [...oldArray, "you have room without door in frame"]);
+          }
+
           let roomInRoom=false;
           if(room.length>0){
             room.reduce((a,b)=>{        //room in room
@@ -758,6 +764,8 @@ export default function AdminMapBuilder() {
         }}>submit
         </button>
         <button className="submit" onClick={()=>{
+          console.log("got to submit")
+          console.log(document.getElementById("1_1").classList)
           localStorage.setItem("lines",JSON.stringify(lines));
           localStorage.setItem("position",JSON.stringify(placedTiles));
           localStorage.setItem("room",JSON.stringify(roomLines))
