@@ -63,6 +63,7 @@ export default function AdminMapBuilder(props) {
   const [openResult,setOpenResult]=useState(false);
   const [count,setCount]=useState(0);
   const forceUpdate = useForceUpdate();
+
   useEffect(()=>{
     if(JSON.parse(localStorage.getItem("position")) === null) {
       localStorage.setItem("lines",JSON.stringify(lines));
@@ -345,36 +346,40 @@ export default function AdminMapBuilder(props) {
   }
   let boardCounter=0;
   let boardhierarchy=[]
-  let boardConnectedToSensor=0
+  let boardConnectedToSensor=true
 function scanTree(node) {
-  let arr = Array.from(node)
+  console.log("scantree")
+  console.log(node)
+
   boardCounter++;
-  if(arr[0]){
-    arr[0].children.forEach(child => {
-      scanTree(child)
-    })
-  }
+
+  node.children.forEach(child => {
+    scanTree(child)
+  })
 
 }
 function boardMustBeWithConnection(node){
-	let arr = Array.from(node)
-	sensorLimit+=arr[0]["microcontroller"]["devices"].length>0?1:0
-	if(arr[0]){
-      arr[0].children.forEach(child => {
-        boardMustBeWithConnection(child)
-      })
-    }
+  console.log("connection")
+  console.log(node)
+
+  if(node.devices.length === 0) 
+    boardConnectedToSensor = false
+
+  node.children.forEach(child => {
+    boardMustBeWithConnection(child)
+  })
+
 }
 let sensorLimit=0
   function rule1(node) {
-    let arr = Array.from(node)
-    console.log(arr[0]["microcontroller"]["devices"].length)
-    sensorLimit=arr[0]["microcontroller"]["devices"].length>sensorLimit?arr[0]["microcontroller"]["devices"].length:sensorLimit
-    if(arr[0]){
-      arr[0].children.forEach(child => {
-        rule1(child)
-      })
-    }
+    console.log("rule1")
+    console.log(node)
+
+    sensorLimit=node.devices.length>sensorLimit?node.devices.length:sensorLimit
+
+    node.children.forEach(child => {
+      rule1(child)
+    })
 
   }
   function placeTile(tile, x, y) {
@@ -487,7 +492,8 @@ let sensorLimit=0
         <button className="submit" onClick={async () => {
           setIcon([]);
           setResult([]);
-          scanTree(props.data)
+          if(props.data[0])
+            scanTree(props.data[0].microcontroller)
           console.log(boardCounter)
           let twoDarray = {};
           for (let x = 0; x < 20; x++) {
@@ -800,14 +806,19 @@ let sensorLimit=0
             console.log(props.data)
           }
            console.log(sensorLimit,parseInt(JSON.parse(localStorage.getItem("limitSensors"))),localStorage.getItem("checkOne"))
-          rule1(props.data)
+          if(props.data[0])
+            rule1(props.data[0].microcontroller)
           if(sensorLimit>parseInt(JSON.parse(localStorage.getItem("limitSensors")))&& localStorage.getItem("checkOne")==="true"){
             setIcon(oldArray => [...oldArray, "xx"]);
             setResult(oldArray => [...oldArray, "too much sensor connected to board in system"]);
             console.log(props.data)
           }
-		  boardMustBeWithConnection(props.data)
-		  if(boardConnectedToSensor&& localStorage.getItem("checkTen")==="true"){
+      boardConnectedToSensor=true
+      if(props.data[0])
+        boardMustBeWithConnection(props.data[0].microcontroller)
+
+		  if(!boardConnectedToSensor && localStorage.getItem("checkedTen")==="true"){
+            console.log("board connect TEST")
             setIcon(oldArray => [...oldArray, "xx"]);
             setResult(oldArray => [...oldArray, "you have board without sensor in the system"]);
             console.log(props.data)

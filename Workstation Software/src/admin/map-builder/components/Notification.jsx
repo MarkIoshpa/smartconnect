@@ -48,8 +48,6 @@ export default function Notification(props) {
             {props.result.forEach((elem,i)=>{
                arr.push(<h3>{props.icons[i]} - {elem}</h3>)
             })}
-
-            {console.log(arr)}
             {arr}
             <footer>
                 <button onClick={handleClose}>exit</button>
