@@ -114,9 +114,12 @@ class Information  extends React.Component{
   getSensorData() {
     this.interval = setInterval(async ()=> {
       let data = await this.props.display.getSensorData()
-      this.setState({output: data.array})
-      this.setState({part:data.time})
+      if(data.array[0] >= 0) // negative value indicates error
+      {
+        this.setState({output: data.array})
+        this.setState({part:data.time})
       }
+    }
     ,1000);
   }
 

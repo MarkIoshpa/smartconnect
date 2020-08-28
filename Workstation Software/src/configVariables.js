@@ -1,6 +1,6 @@
 const loadConfigSetting = function(name, defValue) {
     let variable
-    if(localStorage.getItem(name) === 'undefined') {
+    if(JSON.parse(localStorage.getItem(name)) === null) {
         variable = defValue
         localStorage.setItem(name,JSON.stringify(variable))
         return variable;

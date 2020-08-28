@@ -52,6 +52,7 @@ export default function Settings() {
     const [checked13, setChecked13] = React.useState(true);
     const [checked14, setChecked14] = React.useState(true);
     const [checked15, setChecked15] = React.useState(true);
+    const [checked100, setChecked100] = React.useState(true);
     const handleOpen = () => {
         setOpen(true);
     };
@@ -67,7 +68,13 @@ export default function Settings() {
         else{
             setCheckedOne(false)
         }
-
+        //rule number 100
+        if(JSON.parse(localStorage.getItem("checked100"))===true){
+            setChecked100(true)
+        }
+        else{
+            setChecked100(false)
+        }
         //rule number two
         if(JSON.parse(localStorage.getItem("checkedTwo"))===true){
             setCheckedTwo(true)
@@ -92,7 +99,6 @@ export default function Settings() {
             setCheckedFour(true)
         }
         else{
-            console.log("ccdcd")
             setCheckedFour(false)
         }
         //rule number 5
@@ -184,7 +190,6 @@ export default function Settings() {
     const handleChange=(event)=>{
         if(!Number.isNaN(event.target.value)){
             setConnectLimit(event.target.value)
-            console.log("ddd")
         }
 
     }
@@ -196,7 +201,8 @@ export default function Settings() {
             console.log("ccc")
         }
         localStorage.setItem("checkOne",checkedOne);
-
+        //rule number 100
+        localStorage.setItem("checked100",checked100);
         //rule number two
         localStorage.setItem("checkedTwo",checkedTwo);
         //rule number three
@@ -236,6 +242,17 @@ export default function Settings() {
                 <h2>Planner checker settings</h2>
                 {/*rule number one*/}
                 <Checkbox
+                    checked={checked100}
+                    onChange={(event)=>{
+                        setChecked100(event.target.checked);
+                    }}
+                    inputProps={{ 'aria-label': 'secondary checkbox' }}
+                />
+                <label>
+                    The number of boards in planner and the real system match
+                </label>
+                <br/>
+                <Checkbox
                     checked={checkedOne}
                     onChange={(event)=>{
                         setCheckedOne(event.target.checked);
@@ -243,7 +260,7 @@ export default function Settings() {
                     inputProps={{ 'aria-label': 'secondary checkbox' }}
                 />
                 <label>
-                    The maximum number that can be connected to the board
+                    The maximum number of devices that can be connected to the board
                     <input type="number" min="2" max="16"  value={numOfConnect} onChange={handleChange} />
                 </label>
                 <br/>
@@ -256,7 +273,7 @@ export default function Settings() {
                     inputProps={{ 'aria-label': 'secondary checkbox' }}
                 />
                 <label>
-                    check if sensor connected to other sensor
+                    Check if sensor is connected to another sensor
                 </label>
                 <br/>
                 {/*rule number three*/}
@@ -268,7 +285,7 @@ export default function Settings() {
                     inputProps={{ 'aria-label': 'secondary checkbox' }}
                 />
                 <label>
-                    check if sensor not connected to board
+                    Check if sensor is not connected to board
                 </label>
                 <br/>
                 {/*rule number 4*/}
@@ -284,7 +301,6 @@ export default function Settings() {
                     <input type="number"  value={numOfConnectFour} min="1" max="10" onChange={(event)=>{
                         if(!Number.isNaN(event.target.value)){
                             setRatioLimit(event.target.value)
-                            console.log("dd1")
                         }
 
                     }} />
@@ -299,11 +315,10 @@ export default function Settings() {
                     inputProps={{ 'aria-label': 'secondary checkbox' }}
                 />
                 <label>
-                    few led per room size
+                    Number of led per room size
                     <input type="number"  value={numOfLedFive} min="4" max="6" onChange={(event)=>{
                         if(!Number.isNaN(event.target.value)){
                             setLedLimit(event.target.value)
-                            console.log("dd1")
                         }
 
                     }} />
@@ -318,7 +333,7 @@ export default function Settings() {
                     inputProps={{ 'aria-label': 'secondary checkbox' }}
                 />
                 <label>
-                    light detector must be near window
+                    Light detector must be near window
                 </label>
                 <br/>
                 {/*rule number seven*/}
@@ -330,7 +345,7 @@ export default function Settings() {
                     inputProps={{ 'aria-label': 'secondary checkbox' }}
                 />
                 <label>
-                    must be at least one door in frame of room
+                    Must be at least one door in room frame
                 </label>
                 <br/>
                 {/*rule number eight*/}
@@ -342,7 +357,7 @@ export default function Settings() {
                     inputProps={{ 'aria-label': 'secondary checkbox' }}
                 />
                 <label>
-                    no sensor near the same sensor in room
+                    No sensor near the same sensor in room
                 </label>
                 <br/>
                 {/*rule number nine*/}
@@ -354,7 +369,7 @@ export default function Settings() {
                     inputProps={{ 'aria-label': 'secondary checkbox' }}
                 />
                 <label>
-                    enter sensor must be near door
+                    Enter sensor must be near door
                 </label>
                 <br/>
                 {/*rule number ten*/}
@@ -366,7 +381,7 @@ export default function Settings() {
                     inputProps={{ 'aria-label': 'secondary checkbox' }}
                 />
                 <label>
-                    board must be with connection
+                    Board must have a connection
                 </label>
                 <br/>
                 {/*rule number Eleven*/}
@@ -378,7 +393,7 @@ export default function Settings() {
                     inputProps={{ 'aria-label': 'secondary checkbox' }}
                 />
                 <label>
-                    disallow to place room on other room
+                    Disallow placement of room on another room
                 </label>
                 <br/>
                 {/*rule number Twelve*/}
@@ -390,7 +405,7 @@ export default function Settings() {
                     inputProps={{ 'aria-label': 'secondary checkbox' }}
                 />
                 <label>
-                    window must be in room frame
+                    Window must be in room frame
                 </label>
                 <br/>
                 {/*rule number 13*/}
@@ -402,7 +417,7 @@ export default function Settings() {
                     inputProps={{ 'aria-label': 'secondary checkbox' }}
                 />
                 <label>
-                    must be board in room
+                    Board must be in a room
                 </label>
                 <br/>
                 {/*rule number 14*/}
@@ -414,7 +429,7 @@ export default function Settings() {
                     inputProps={{ 'aria-label': 'secondary checkbox' }}
                 />
                 <label>
-                    must be place sensor in room
+                    Sensor must be placed in a room
                 </label>
                 <br/>
                 {/*rule number 15*/}
@@ -426,10 +441,29 @@ export default function Settings() {
                     inputProps={{ 'aria-label': 'secondary checkbox' }}
                 />
                 <label>
-                    door must be in room frame
+                    Door must be in room frame
                 </label>
                 <br/>
                 <input type="submit" value="Save" />
+                <button onClick={(e)=>{
+                    e.preventDefault()
+                    setChecked15(true)
+                    setChecked14(true)
+                    setChecked13(true)
+                    setCheckedTwelve(true)
+                    setCheckedEleven(true)
+                    setCheckedTen(true)
+                    setCheckedNine(true)
+                    setCheckedeight(true)
+                    setCheckedSeven(true)
+                    setCheckedSix(true)
+                    setCheckedFive(true)
+                    setCheckedFour(true)
+                    setCheckedThree(true)
+                    setCheckedTwo(true)
+                    setCheckedOne(true)
+                    setChecked100(true)
+                }}>check all</button>
             </form>
         </div>
     );

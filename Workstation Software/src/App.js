@@ -10,8 +10,8 @@ import AdminMapBuilder from "./admin/map-builder";
 import Settings from "./components/settings"
 import consts from './consts';
 import errorDetector from "./components/errorDetector";
-import { configVariables } from "./configVariables"
-var { getAllBoardConfiguration, isReady } = window.require('./src/workstation-communication.js');
+import { configVariables } from "./configVariables";
+const { getAllBoardConfiguration, isReady } = window.require(process.env.PUBLIC_URL + '/workstation-communication.js');
 var errorDetect=new errorDetector();
 
 class App extends React.Component{

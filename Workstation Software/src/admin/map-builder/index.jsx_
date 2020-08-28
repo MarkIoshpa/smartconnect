@@ -8,10 +8,10 @@ import Notification from "./components/Notification";
 const tiles = [
   "empty",
   "board",
-  "Window",
-  "Door",
-  "audio",
-  "Led",
+    "Window",
+    "Door",
+    "audio",
+    "Led",
   "room-3x3",
   "room-4x4",
   "room-5x5",
@@ -21,9 +21,9 @@ const tiles = [
 ];
 const sensor=[
   "audio",
-  "Led",
-  "light-detector",
-  "enter-sensor"
+    "Led",
+    "light-detector",
+    "enter-sensor"
 ];
 const walls=[
   "Window",
@@ -53,7 +53,7 @@ function useForceUpdate(){
   return () => setValue(value => ++value); // update the state to force render
 }
 
-export default function AdminMapBuilder(props) {
+export default function AdminMapBuilder() {
   const [placedTiles, setPlacedTiles] = useState(defaultTiles);
   const [compButton,setCompButton] = useState("all");
   const [lines,setLines]= useState([]);
@@ -63,7 +63,6 @@ export default function AdminMapBuilder(props) {
   const [openResult,setOpenResult]=useState(false);
   const [count,setCount]=useState(0);
   const forceUpdate = useForceUpdate();
-
   useEffect(()=>{
     if(JSON.parse(localStorage.getItem("position")) === null) {
       localStorage.setItem("lines",JSON.stringify(lines));
@@ -90,8 +89,11 @@ export default function AdminMapBuilder(props) {
 
 
   },[]);
+  useEffect(()=>{
+    console.log(roomLines)
+  },[roomLines]);
   function sensorToBoard(afterSubmit) {
-    let flag=false,n;
+    let flag=false;
     for (const square in afterSubmit){
       let temp=0;
       let limit=parseInt(JSON.parse(localStorage.getItem("limitSensors")));
@@ -106,13 +108,22 @@ export default function AdminMapBuilder(props) {
         }
         if(temp>=limit){
           flag=true;
-          if(localStorage.getItem("checkOne")==="true"){
-            setResult(oldArray => [...oldArray, "1"]);
+          // alert("to many components  connected to board in x= "+square.split("_")[0]+ "and  y= "+square.split("_")[1])
+          if(localStorage.getItem("checkOne")==="false"){
+            return;
           }
-
+          else{
+            let i=icons;
+            i.push("x");
+            setIcon(i);
+            i=result;
+            i.push("Too many components  connected to board");
+            setResult(i);
+            return
+          }
         }
       }
-    }
+      }
 
   }
   function boardNotConnected(afterSubmit) {   //check if has board without connection
@@ -125,8 +136,8 @@ export default function AdminMapBuilder(props) {
           }
         }
         if(temp && localStorage.getItem("checkedTen")==="true"){
-
-          setResult(oldArray => [...oldArray, "10"]);
+          setIcon(oldArray => [...oldArray, "x"]);
+          setResult(oldArray => [...oldArray, "board is Connectionless"]);
         }
       }
     }
@@ -155,8 +166,15 @@ export default function AdminMapBuilder(props) {
     // for(const x in notificationPosition){
     //   alert(notificationName[x]+" in position x: "+notificationPosition[x].split("_")[0]+" and y: "+ notificationPosition[x].split("_")[1]+" is connected to another sensor")
     // }
-    if(notificationPosition.length>0 && localStorage.getItem("checkedTwo")==="true"){
-      setResult(oldArray => [...oldArray, "2"]);
+    if(notificationPosition.length>0){
+      if(localStorage.getItem("checkedTwo")==="false"){
+        return
+      }
+      else {
+        setIcon(oldArray => [...oldArray, "x"])
+        setResult(oldArray => [...oldArray, "board is connected to other board"])
+        return;
+      }
     }
   }
   function sensorNotConnected(afterSubmit) {
@@ -169,8 +187,16 @@ export default function AdminMapBuilder(props) {
             temp=true
           }
         }
-        if(!temp && localStorage.getItem("checkedThree")==="true"){
-          setResult(oldArray => [...oldArray, "3"]);
+        if(!temp){
+            if(localStorage.getItem("checkedThree")==="false"){
+              return
+            }
+            else {
+              setIcon(oldArray => [...oldArray, "x"])
+              setResult(oldArray => [...oldArray, "you have sensor not connected to board"])
+              return;
+            }
+
         }
 
       }
@@ -178,6 +204,7 @@ export default function AdminMapBuilder(props) {
 
     }
   }
+
   function buildRoom(roomSize,startPoint) {     //build room in the board
     const size=parseInt(roomSize[0])-1;
     const xStart=parseInt(startPoint.split("_")[0]);    //get  x_y example 12_14
@@ -222,8 +249,10 @@ export default function AdminMapBuilder(props) {
     setRoomLines(x)
   }
   function destroyRoom(start,size=0) {        //remove room from board-when tap twice on the start square
+    console.log(size);
     let room=[];
     let flag=false;
+    console.log("1- ",room,roomLines);
     if(size===0){         //if drop component doesnt room
       room=roomLines.filter(x=>x["start"]!==start)
     }
@@ -247,9 +276,11 @@ export default function AdminMapBuilder(props) {
           room.push(elem)
         }
       });
+      console.log("2- ",room,roomLines)
     }
     setRoomLines(room);
 
+    console.log("3- ",room,roomLines)
   }
   function handleDrag(e) {
     e.dataTransfer.setData("text", e.target.id)
@@ -258,6 +289,7 @@ export default function AdminMapBuilder(props) {
     e.preventDefault();
 
     const tile = e.dataTransfer.getData("text").split("_")[0];    //what drag
+    console.log(tile)
     if(e.dataTransfer.getData("text").match(/^\d/)===null){
       let one=e.target.className.split(" ")[2];   //e.target is where to drop
       //when drag and drop component
@@ -286,6 +318,7 @@ export default function AdminMapBuilder(props) {
         else{
           destroyRoom(e.target.id)
         }
+        console.log(roomLines)
 
       }
     }
@@ -295,6 +328,7 @@ export default function AdminMapBuilder(props) {
       if(one.slice(0,4)==="room"){      //if drop on start we remove the room
         return
       }
+
       let temp=document.getElementById(e.dataTransfer.getData("text")).classList[2];
       if(e.target.classList[2]!=="empty" && temp!=="empty" && !walls.includes(temp) && !walls.includes(e.target.classList[2]) ){
         if(e.target.id===e.dataTransfer.getData("text")){
@@ -311,49 +345,18 @@ export default function AdminMapBuilder(props) {
         setLines(x);
         forceUpdate()
       }
-    }
+      }
 
-
-  }
-  let boardCounter=0;
-  let boardhierarchy=[]
-  let boardConnectedToSensor=true
-  function scanTree(node) {
-
-    boardCounter++;
-
-    node.children.forEach(child => {
-      scanTree(child)
-    })
-
-  }
-  function boardMustBeWithConnection(node){
-
-    if(node.devices.length === 0)
-      boardConnectedToSensor = false
-
-    node.children.forEach(child => {
-      boardMustBeWithConnection(child)
-    })
-
-  }
-  let sensorLimit=0
-  function rule1(node) {
-
-    sensorLimit=node.devices.length>sensorLimit?node.devices.length:sensorLimit
-
-    node.children.forEach(child => {
-      rule1(child)
-    })
 
   }
   function placeTile(tile, x, y) {
     const snappedX = Math.ceil(x / 32) * 32 - 32;
     const snappedY = Math.ceil((y-42) / 32) * 32 - 32;
+    console.log(snappedX,snappedY)
 
     setPlacedTiles(prevState => [
       ...prevState.filter(
-          prev => !(prev.x === snappedX && prev.y === snappedY)
+        prev => !(prev.x === snappedX && prev.y === snappedY)
       ),
       {
         tile,
@@ -373,8 +376,8 @@ export default function AdminMapBuilder(props) {
         }}
     >
       {placedTiles.map((placed) => <div
-          className={`placed tile ${placed.tile} ${placed.tile==="empty"?"v":"f"} ${placed.x / SIZE}_${placed.y / SIZE}`}
-          id={`${placed.x / SIZE}_${placed.y / SIZE}`}
+          className={`placed tile ${placed.tile} ${placed.tile==="empty"?"v":"f"} ${placed.x / SIZE}_${Math.round(placed.y / SIZE)}`}
+          id={`${placed.x / SIZE}_${Math.round(placed.y / SIZE)}`}
           draggable={true}
           onDragStart={handleDrag}
           onDoubleClick={(e) => {
@@ -454,62 +457,10 @@ export default function AdminMapBuilder(props) {
         }
       </div>
       <div>
-        <button className="submit" onClick={async () => {
-          setIcon([]);
-          setResult([]);
-          if(localStorage.getItem("checkOne")==="true"){
-            setIcon(oldArray => [...oldArray, "1"]);
-            setIcon(oldArray => [...oldArray, "101"]);
-          }
-          if(localStorage.getItem("checked100")==="true"){
-            setIcon(oldArray => [...oldArray, "100"]);
-          }
-          if(localStorage.getItem("checkedTwo")==="true"){
-            setIcon(oldArray => [...oldArray, "2"]);
-          }
-          if(localStorage.getItem("checkedThree")==="true"){
-            setIcon(oldArray => [...oldArray, "3"]);
-          }
-          if(localStorage.getItem("checkedFour")==="true"){
-            setIcon(oldArray => [...oldArray, "4"]);
-          }
-          if(localStorage.getItem("checkedFive")==="true"){
-            setIcon(oldArray => [...oldArray, "5"]);
-          }
-          if(localStorage.getItem("checkedSix")==="true"){
-            setIcon(oldArray => [...oldArray, "6"]);
-          }
-          if(localStorage.getItem("checkedSeven")==="true"){
-            setIcon(oldArray => [...oldArray, "7"]);
-          }
-          if(localStorage.getItem("checkedeight")==="true"){
-            setIcon(oldArray => [...oldArray, "8"]);
-          }
-          if(localStorage.getItem("checkedNine")==="true"){
-            setIcon(oldArray => [...oldArray, "9"]);
-          }
-          if(localStorage.getItem("checkedTen")==="true"){
-            setIcon(oldArray => [...oldArray, "10"]);
-            setIcon(oldArray => [...oldArray, "110"]);
-          }
-          if(localStorage.getItem("checkedEleven")==="true"){
-            setIcon(oldArray => [...oldArray, "11"]);
-          }
-          if(localStorage.getItem("checkedTwelve")==="true"){
-            setIcon(oldArray => [...oldArray, "12"]);
-          }
-          if(localStorage.getItem("checked13")==="true"){
-            setIcon(oldArray => [...oldArray, "13"]);
-          }
-          if(localStorage.getItem("checked14")==="true"){
-            setIcon(oldArray => [...oldArray, "14"]);
-          }
-          if(localStorage.getItem("checked15")==="true"){
-            setIcon(oldArray => [...oldArray, "15"]);
-          }
-
-          if(props.data[0])
-            scanTree(props.data[0].microcontroller)
+        <button className="submit" onClick={() => {
+          console.log(document.getElementById("1_1").classList)
+          setIcon([])
+          setResult([])
           let twoDarray = {};
           for (let x = 0; x < 20; x++) {
             for (let y = 0; y < 14; y++) {
@@ -531,6 +482,7 @@ export default function AdminMapBuilder(props) {
             let square=elem["start"];
             let x=parseInt(square.split("_")[0]),y=parseInt(square.split("_")[1]);
             let size=parseInt(elem["size"])+1;
+            console.log(x,y,square,size);
             let sizeIn=0,sizeOut=0;
             while(sizeIn<size){
               sizeOut=0;
@@ -550,6 +502,7 @@ export default function AdminMapBuilder(props) {
             let square=elem["start"];
             let x=parseInt(square.split("_")[0]),y=parseInt(square.split("_")[1]);
             let size=parseInt(elem["size"])+1;
+            console.log(x,y,square,size);
             let sizeOut=0;
             while(sizeOut<size){        //the top line
               arr.push(`${x+sizeOut}_${y}`);
@@ -568,24 +521,35 @@ export default function AdminMapBuilder(props) {
             }
             roomFrame.push(arr)      //room -each item is room squares  in the planner
           });
-
+          console.log(roomFrame)
           let flag=true;
           roomFrame.forEach((elem)=> {
             if(flag){
-              flag=false;
-              let range = document.getElementsByClassName("Door").length;
+              flag=false
+              let range = document.getElementsByClassName("Door").length
               for (range--; range >= 0; range--) {
                 if (elem.includes(document.getElementsByClassName("Door")[range].id)) {
                   flag = true
                 }
               }
             }
-          });
 
-          if(!flag && localStorage.getItem("checkedSeven")==="true"){    //rule number 7-door on frame
-            setResult(oldArray => [...oldArray, "7"]);
-          }
 
+          })
+            // elem.forEach((square)=>{
+            //   forceUpdate()
+            //   console.log(document.getElementById(square).classList,square)
+            //   console.log(document.getElementsByClassName("Door")[0].id)
+            //   if(document.getElementById(square).classList[2]==="Door"){
+            //     console.log(flag)
+            //     flag=true
+            //   }
+            // });
+            if(!flag && localStorage.getItem("checkedSeven")==="true"){    //rule number 7-door on frame
+              setIcon(oldArray => [...oldArray, "x"]);
+              setResult(oldArray => [...oldArray, "you have room without door in frame"]);
+            }
+          ;
           let roomInRoom=false;
           if(room.length>0){
             room.reduce((a,b)=>{        //room in room
@@ -599,12 +563,19 @@ export default function AdminMapBuilder(props) {
           }
 
           if(roomInRoom && localStorage.getItem("checkedEleven")==="true"){
-            setResult(oldArray => [...oldArray, "11"]);
+            setIcon(oldArray => [...oldArray, "x"]);
+            setResult(oldArray => [...oldArray, "you have room on room"]);
           }
           //rule number 4 -board per sensors
           let sensorPerRoom=[];      //array of array-index 0 is number of board in room index 1 is number of sensor in room
           room.forEach((elem)=>{
             let x=[],sen=0,boa=0,sensorArray=[],sensorPlace=[],ledInRoom=0,windowOnRoom=[],lightInRoom=[],DoorInRoom=[],enterSensor=[];
+            [].forEach.call(document.getElementsByClassName("board"), function (node) {
+              if(elem.includes(node.id)){
+                boa++
+              }
+            })
+
             elem.forEach((squre)=>{
               let y=document.getElementById(squre).classList[2];
               if(sensor.includes(y)){
@@ -627,9 +598,6 @@ export default function AdminMapBuilder(props) {
               if(y==="Door"){
                 DoorInRoom.push(squre)
               }
-              if(y==="board"){
-                boa++
-              }
             });
             x.push(boa);
             x.push(sen);
@@ -643,39 +611,41 @@ export default function AdminMapBuilder(props) {
             sensorPerRoom.push(x)
           });
           let flag4=false;
-
           sensorPerRoom.forEach((elem)=>{
             if(!flag4){
               if(elem[0]>1){
-                let num=localStorage.getItem("numOfConnectFour");
-                if(elem[1]/elem[0]<num){
-                  flag4=true;
-                  if(localStorage.getItem("checkedFour")==="true"){
-                    setResult(oldArray => [...oldArray, "4"]);
-                  }
-
+                let num=localStorage.getItem("numOfConnectFour")
+              if(elem[1]/elem[0]<num){
+                flag4=true;
+                if(localStorage.getItem("checkedFour")==="true"){
+                  setIcon(oldArray => [...oldArray, "x"]);
+                  setResult(oldArray => [...oldArray, "Too many boards per sensor ratio in room"]);
                 }
               }
             }
+            }
           });
+          console.log(sensorPerRoom);
           //rule number 5-Too little led
           let flag5=false;
           sensorPerRoom.forEach((elem,index)=>{
-            let num=localStorage.getItem("numOfLedFive");
+            let num=localStorage.getItem("numOfLedFive")
+            console.log(elem);
             if(!flag5){
-              if(elem[3]>0){
-                if(elem[3]/room[index].length<1/num**2){
-                  flag5=true;
-                  if(localStorage.getItem("checkedFive")==="true"){
-                    setResult(oldArray => [...oldArray, "5"]);
-                  }
-
+            if(elem[3]>0){
+              if(elem[3]/room[index].length<1/num**2){
+                flag5=true
+                if(localStorage.getItem("setCheckedFive")==="true"){
+                  setIcon(oldArray => [...oldArray, "x"]);
+                  setResult(oldArray => [...oldArray, "you dont enough led inside the room"]);
                 }
-              }}
+              }
+            }}
           });
           //rule number 12-window must be in frame
-
+          console.log(roomFrame);
           sensorPerRoom.forEach((elem,index)=>{
+            console.log(elem);
             let flag=true;
             if(elem[4].length>0){
               elem[4].forEach((square)=>{
@@ -686,6 +656,7 @@ export default function AdminMapBuilder(props) {
             }
             let doorFlag=true;
             if(elem[6].length>0){     //door not in frame
+              console.log(elem[6]);
               elem[6].forEach((square)=>{
                 if(!roomFrame[index].includes(square)){
                   doorFlag=false
@@ -693,21 +664,25 @@ export default function AdminMapBuilder(props) {
               })
             }
             if(elem[0]===0 && localStorage.getItem("checked13")==="true"){
-              setResult(oldArray => [...oldArray, "13"]);
+              setIcon(oldArray => [...oldArray, "x"]);
+              setResult(oldArray => [...oldArray, "you have room without board"]);
             }
             if(elem[1]===0 && localStorage.getItem("checked14")==="true"){
-              setResult(oldArray => [...oldArray, "14"]);
+              setIcon(oldArray => [...oldArray, "x"]);
+              setResult(oldArray => [...oldArray, "you have room without sensors"]);
             }
             if(!flag && localStorage.getItem("checkedTwelve")==="true"){
-              setResult(oldArray => [...oldArray, "12"]);
+              setIcon(oldArray => [...oldArray, "x"]);
+              setResult(oldArray => [...oldArray, "you have window not in frame"]);
             }
             if(!doorFlag && localStorage.getItem("checked15")==="true"){
-              setResult(oldArray => [...oldArray, "15"]);
+              setIcon(oldArray => [...oldArray, "x"]);
+              setResult(oldArray => [...oldArray, "you have Door not in frame"]);
             }
           });
 
           //rule number 6-light detector must me near window
-          sensorPerRoom.forEach((elem)=>{
+          sensorPerRoom.forEach((elem,)=>{
             if(elem[5].length>0){       //have light-detector in room
               elem[5].forEach((element)=>{
                 let flag=false,x=parseInt(element.split("_")[0]),y=parseInt(element.split("_")[1]);
@@ -731,8 +706,9 @@ export default function AdminMapBuilder(props) {
                     && elem[4].includes(`${x}_${y-1}`)){
                   flag=true
                 }
-                if(!flag && localStorage.getItem("checkedSix")==="true"){
-                  setResult(oldArray => [...oldArray, "6"]);
+                if(localStorage.getItem("checkedSix")==="true"&&!flag){
+                  setIcon(oldArray => [...oldArray, "x"]);
+                  setResult(oldArray => [...oldArray, "the light sensor must be near the window"]);
                 }
               })
             }
@@ -763,8 +739,8 @@ export default function AdminMapBuilder(props) {
                   doorFlag=true
                 }
                 if(!doorFlag && localStorage.getItem("checkedNine")==="true"){
-                  setResult(oldArray => [...oldArray, "9"]);
-                  console.log(result)
+                  setIcon(oldArray => [...oldArray, "x"]);
+                  setResult(oldArray => [...oldArray, "the enter-sensor must be near the Door"]);
                 }
               })
             }
@@ -773,6 +749,7 @@ export default function AdminMapBuilder(props) {
           sensorPerRoom.forEach((elem)=>{
             let sensorFlag=false;
             if(elem[1]>0){       //have enter-sensor in room
+              console.log(elem[8]);
               elem[8].forEach((element)=>{
                 let sensorName=document.getElementById(element).classList[2];
                 let x=parseInt(element.split("_")[0]),y=parseInt(element.split("_")[1]);
@@ -795,38 +772,21 @@ export default function AdminMapBuilder(props) {
 
               })
             }
-            console.log(result)
 
             if(sensorFlag && localStorage.getItem("checkedeight")==="true"){
-              setResult(oldArray => [...oldArray, "8"]);
+              setIcon(oldArray => [...oldArray, "x"]);
+              setResult(oldArray => [...oldArray, "you have same sensor near each other"]);
             }
-          });
-          console.log(result)
-          if((boardCounter!==document.getElementsByClassName("board").length-1)&& localStorage.getItem("checked100")==="true"){
-            setResult(oldArray => [...oldArray, "100"]);
-          }
-          if(props.data[0])
-            rule1(props.data[0].microcontroller)
-          console.log(result)
-          if(sensorLimit>parseInt(JSON.parse(localStorage.getItem("limitSensors"))) && localStorage.getItem("checkOne")==="true"){
-            setResult(oldArray => [...oldArray, "101"]);
-          }
-          console.log(result)
-          boardConnectedToSensor=true
-          if(props.data[0])
-            boardMustBeWithConnection(props.data[0].microcontroller)
-          if(!boardConnectedToSensor && localStorage.getItem("checkedTen")==="true"){
-            setResult(oldArray => [...oldArray, "110"]);
-          }
+          })
           setCount(count+1)
-        }}>Check
+        }}>submit
         </button>
         <button className="submit" onClick={()=>{
           localStorage.setItem("lines",JSON.stringify(lines));
           localStorage.setItem("position",JSON.stringify(placedTiles));
           localStorage.setItem("room",JSON.stringify(roomLines))
         }}>save</button>
-        <Settings />
+          <Settings />
         <Notification open={count} icons={icons} result={result}/>
       </div>
     </div>

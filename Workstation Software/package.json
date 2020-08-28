@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "module": "commonjs",
   "private": true,
-  "main": "electron-starter.js",
+  "main": "public/electron.js",
+  "homepage": "./",
   "dependencies": {
     "@material-ui/icons": "^4.9.1",
     "@testing-library/jest-dom": "^4.2.4",
@@ -13,6 +14,14 @@
     "async-mutex": "^0.2.1",
     "bindings": "^1.5.0",
     "bootstrap": "^4.4.1",
+    "cross-env": "^7.0.2",
+    "electron-build": "0.0.3",
+    "electron-is-dev": "^1.2.0",
+    "electron-require": "^0.3.0",
+    "express": "^4.17.1",
+    "foreman": "^3.0.1",
+    "mysql": "^2.18.1",
+    "net": "^1.0.2",
     "react": "^16.13.0",
     "react-alert": "^7.0.0",
     "react-animated-tree": "^1.0.10",
@@ -33,15 +42,39 @@
     "typescript": "^3.8.3"
   },
   "scripts": {
-    "start": "react-scripts --max_old_space_size=4096 start",
-    "build": "react-scripts --max_old_space_size=4096 build",
+    "electron-start": "node electron-wait-react",
+    "react-start": "react-scripts --max_old_space_size=4096 start",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "start": "nf start -p 3000",
+    "electron-dev": "concurrently \"SET BROWSER=none yarn start\" \"wait-on http://localhost:3000 && electron .\"",
+    "react-build": "react-scripts --max_old_space_size=4096 build",
+    "release": "yarn react-build && electron-builder --publish=always",
+    "build": "yarn react-build && yarn electron-builder",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "electron": "electron .",
-    "rebuild": "electron-rebuild -f -w yourmodule"
+    "rebuild": "electron-rebuild -f -w yourmodule",
+    "preelectron-pack": "npm run build",
+    "electron-pack": "build -c.extraMetadata.main=build/electron.js"
+  },
+  "electron-require": {
+    "src": "src/"
   },
   "eslintConfig": {
     "extends": "react-app"
+  },
+  "build": {
+    "appId": "com.smartconnect",
+    "compression": "normal",
+    "productName": "Smart Connect",
+    "directories": {
+      "buildResources": "build",
+      "output": "dist"
+    },
+    "win": {
+      "icon": "./build/favicon.ico"
+    }
   },
   "browserslist": {
     "production": [
@@ -56,8 +89,10 @@
     ]
   },
   "devDependencies": {
+    "@material-ui/core": "^4.9.14",
     "electron": "^8.2.0",
-    "electron-rebuild": "^1.10.1",
-    "@material-ui/core": "^4.9.14"
+    "electron-builder": "^22.7.0",
+    "electron-packager": "^15.0.0",
+    "electron-rebuild": "^1.10.1"
   }
 }

@@ -1,7 +1,9 @@
 import React from 'react';
 import {Table} from 'react-bootstrap'
 import './History.css'
+var connection = window.require(process.env.PUBLIC_URL +'/database.js');
 
+const SELECT_ALL = 'SELECT * FROM events WHERE id_s = 1';
 export default class History extends React.Component {
     constructor() {
         super();
@@ -9,6 +11,14 @@ export default class History extends React.Component {
     }
     componentDidMount() {
         this.setState({rows:this.props.rows})
+        connection.query(SELECT_ALL,(err,results)=>{
+            if(err){
+                
+            }
+            else{
+                this.setState({rows:results})
+            }
+        })
     }
 
     render() {

@@ -11,37 +11,41 @@
   position: absolute;
 }
 .enter-sensor{
-  background: url(/pir.png);
+  background: url("./assets/tiles/pir.png");
 }
 .light-detector{
-  background: url(/light.png);
+  background: url("./assets/tiles/light.png");
 }
 .board {
-  background: url(/board.png);
+  background: url("./assets/tiles/board.png");
 }
 .audio {
-  background: url(/audio.png);
+  background: url("./assets/tiles/audio.png");
 }
 
 .Window {
-  background: url(/Window.png);
+  background: url("./assets/tiles/Window.png");
 }
 .Door {
-  background: url(/Door.png);
+  background: url("./assets/tiles/Door.png");
 }
 
 .Led {
-  background: url(/Led.png);
+  background: url("./assets/tiles/Led.png");
 }
 .room-3x3 {
-  background: url(/area.png);
+  background: url("./assets/tiles/area.png");
 }
 .room-4x4 {
-  background: url(/area.png);
+  background: url("./assets/tiles/area.png");
 }
 .room-5x5 {
-  background: url(/area.png);
+  background: url("./assets/tiles/area.png");
 }
 .room-6x6 {
-  background: url(/area.png);
+  background: url("./assets/tiles/area.png");
+}
+
+.map-builder .map {
+  background-image: url("./assets/grid.png");
 }

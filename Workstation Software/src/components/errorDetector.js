@@ -1,5 +1,6 @@
 import toaster from "toasted-notes";
 import "toasted-notes/src/styles.css";
+var connection = window.require(process.env.PUBLIC_URL +'/database.js');
 
 export default class errorDetector{
     allBoard=[];
@@ -95,7 +96,7 @@ export default class errorDetector{
                     }
                 });
                 let d= new Date();
-                this.notification.unshift([
+                this.addNotification([
                     d.toLocaleDateString()+" "+d.toLocaleTimeString(),
                     name,
                     "is not connected anymore",
@@ -122,7 +123,7 @@ export default class errorDetector{
                     }
                 });
                 let d= new Date();
-                this.notification.unshift([
+                this.addNotification([
                     d.toLocaleDateString()+" "+d.toLocaleTimeString(),
                     name,
                     "is connected the first time",
@@ -140,7 +141,7 @@ export default class errorDetector{
                         }
                     });
                     let d= new Date();
-                    this.notification.unshift([
+                    this.addNotification([
                         d.toLocaleDateString()+" "+d.toLocaleTimeString(),
                         name,
                         "is connected again"
@@ -173,7 +174,7 @@ export default class errorDetector{
                     }
                 })
                     let d= new Date();
-                    this.notification.unshift([
+                    this.addNotification([
                         d.toLocaleDateString()+" "+d.toLocaleTimeString(),
                         name,
                         "is connected again"
@@ -202,13 +203,22 @@ export default class errorDetector{
                         }
                     })
                     let d= new Date();
-                    this.notification.unshift([
+                    this.addNotification([
                         d.toLocaleDateString()+" "+d.toLocaleTimeString(),
                         name,
                         "is connected again"
-                    ]);
+                    ])
                 }
             }
         }
+    }
+
+    addNotification(array){
+        this.notification.unshift(array)
+        const date = array[0]
+        const id_board = array[1]
+        const event = array[2]
+        const INSERT_EVENT = `INSERT INFO events (id_s, id_event,date,id_board,event) VALUES( 1, NULL , ${date}, ${id_board}, ${event} )`  
+        connection.query(INSERT_EVENT, (err, results)=>{})
     }
 }

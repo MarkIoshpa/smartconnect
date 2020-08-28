@@ -26,13 +26,10 @@ function createWindow() {
         }
     });
 
-    const startUrl = process.env.ELECTRON_START_URL || url.format({pathname: path.join(__dirname, 'build//index.html'),protocol: 'file:',slashes: true});
+    const startUrl = process.env.ELECTRON_START_URL || url.format({pathname: path.join(__dirname, './index.html'),protocol: 'file:',slashes: true});
 
     // and load the index.html of the app.
     mainWindow.loadURL(startUrl)
-
-    // Open the DevTools.
-    mainWindow.webContents.openDevTools();
 
     // Emitted when the window is closed.
     mainWindow.on('closed', function () {

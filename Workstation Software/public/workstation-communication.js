@@ -4,6 +4,11 @@ const withTimeout = require('async-mutex').withTimeout;
 const consts = require('./consts');
 
 var comport = JSON.parse(localStorage.getItem("comport"))
+
+if(JSON.parse(localStorage.getItem("comport")) === null) {
+    comport = consts.COM_PORT;
+}
+
 var serialPort = new SerialPort(comport, {baudRate: 9600})
 const mutexWithTimeout = withTimeout(new Mutex(), 1000, new Error('timeout'));
 var ready = false

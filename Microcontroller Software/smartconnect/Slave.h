@@ -8,6 +8,8 @@
 
 // Response Protocol Definitions
 
+#define MIN_LENGTH          4  // Minimum length of response (no data)
+#define EXECUTE_TIME_LENGTH 4  // Length of the execute time variable in bytes
 #define COMPLETECODE_OFFSET 1  // Specifies completion code
 #define DATA_LENGTH_OFFSET  2  // Specifies length of data sent in response
 #define DATA_OFFSET         3  // Start of data sequence

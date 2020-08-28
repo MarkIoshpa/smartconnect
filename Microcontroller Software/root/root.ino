@@ -100,7 +100,7 @@ void getConfigData()
   buffer[deviceOffset] = devicesLength;
 
   buffer[DATA_LENGTH_OFFSET] = 4 + descLength + devicesLength;
-  buffer[PACKAGE_LENGTH_OFFSET] = 4 + buffer[DATA_LENGTH_OFFSET]; // 4 bytes for checksum data length, completion code and package length.
+  buffer[PACKAGE_LENGTH_OFFSET] = MIN_LENGTH + buffer[DATA_LENGTH_OFFSET]; // 4 bytes (min length) for checksum data length, completion code and package length.
   buffer[buffer[PACKAGE_LENGTH_OFFSET]-1] = checksum();
 }
 
@@ -148,7 +148,7 @@ void setConfigData()
   else
     buffer[COMPLETECODE_OFFSET] = FAILED;
 
-  buffer[PACKAGE_LENGTH_OFFSET] = 4;
+  buffer[PACKAGE_LENGTH_OFFSET] = MIN_LENGTH;
   buffer[DATA_LENGTH_OFFSET] = 0;
   buffer[buffer[PACKAGE_LENGTH_OFFSET]-1] = checksum();
 }
@@ -188,11 +188,11 @@ void readDevices()
   }
   
   buffer[COMPLETECODE_OFFSET] = SUCCESS;
-  buffer[PACKAGE_LENGTH_OFFSET] = 8+j*2;
+  buffer[PACKAGE_LENGTH_OFFSET] = MIN_LENGTH+EXECUTE_TIME_LENGTH+j*2;
   buffer[DATA_LENGTH_OFFSET] = j*2;
   executeTime = micros() - startTime;
-  for(int k = 0; k < 4; k++)
-    buffer[buffer[PACKAGE_LENGTH_OFFSET]-1-(4-k)] = executeTime >> k*8; // 4 bytes for unsigned long
+  for(int k = 0; k < EXECUTE_TIME_LENGTH; k++)  // execute time length is 4 bytes for unsigned long
+    buffer[buffer[PACKAGE_LENGTH_OFFSET]-1-(EXECUTE_TIME_LENGTH-k)] = executeTime >> k*8;
   buffer[buffer[PACKAGE_LENGTH_OFFSET]-1] = checksum();
 }
 
@@ -223,7 +223,7 @@ void writeDevice()
     break;
   }
   
-  buffer[PACKAGE_LENGTH_OFFSET] = 4;
+  buffer[PACKAGE_LENGTH_OFFSET] = MIN_LENGTH;
   buffer[DATA_LENGTH_OFFSET] = 0;
   buffer[buffer[PACKAGE_LENGTH_OFFSET]-1] = checksum();
 }
@@ -244,7 +244,7 @@ bool checksumError()
 {
   if(buffer[buffer[PACKAGE_LENGTH_OFFSET]-1] != checksum())
   {
-    buffer[PACKAGE_LENGTH_OFFSET] = 4;
+    buffer[PACKAGE_LENGTH_OFFSET] = MIN_LENGTH;
     buffer[COMPLETECODE_OFFSET] = CHECKSUM_ERR;
     buffer[DATA_LENGTH_OFFSET] = 0;
     buffer[buffer[PACKAGE_LENGTH_OFFSET]-1] = checksum();
@@ -256,7 +256,7 @@ bool checksumError()
 // Sets buffer according to request error
 void requestError()
 {
-  buffer[PACKAGE_LENGTH_OFFSET] = 4;
+  buffer[PACKAGE_LENGTH_OFFSET] = MIN_LENGTH;
   buffer[COMPLETECODE_OFFSET] = errorByte;
   buffer[DATA_LENGTH_OFFSET] = 0;
   buffer[buffer[PACKAGE_LENGTH_OFFSET]-1] = checksum();
