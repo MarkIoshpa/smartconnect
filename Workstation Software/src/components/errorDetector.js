@@ -1,6 +1,6 @@
 import toaster from "toasted-notes";
 import "toasted-notes/src/styles.css";
-var connection = window.require(process.env.PUBLIC_URL +'/database.js');
+var connection = window.require('./src/database.js');
 
 export default class errorDetector{
     allBoard=[];
@@ -21,24 +21,6 @@ export default class errorDetector{
         }
         return false
 
-    }
-    getLiveBoard(){
-        return this.liveBoard
-    }
-    getFirstBoard(){
-        return this.waitFirstBoard
-    }
-    getSecondBoard(){
-        return this.waitSecondBoard
-    }
-    getThirdBoard(){
-        return this.waitThirdBoard
-    }
-    getNotAlive(){
-        return this.notAliveBoard
-    }
-    getAllBoard(){
-        return this.allBoard
     }
 
     setLive(y){
@@ -112,10 +94,8 @@ export default class errorDetector{
             //handle if this board  not exist
             if(this.isBoardExist(boardsId[x])===false){
                 //first time show this board
-                console.log("first update"+boardsId[x]);
                 this.allBoard.push(boards[x]);
                 this.liveBoard.push(boardsId[x]);
-                console.log(x+" "+boardsId[x])
                 let name="";
                 this.allBoard.forEach(child=>{
                     if(child.id===boardsId[x]){
@@ -166,7 +146,6 @@ export default class errorDetector{
                         this.waitFirstBoard.splice(index, 1);
                         //remove elements from not alive array
                     }
-                    console.log(this.waitFirstBoard)
                     let name="";
                     this.allBoard.forEach(child=>{
                         if(child.id===boardsId[x]){
@@ -218,7 +197,7 @@ export default class errorDetector{
         const date = array[0]
         const id_board = array[1]
         const event = array[2]
-        const INSERT_EVENT = `INSERT INFO events (id_s, id_event,date,id_board,event) VALUES( 1, NULL , ${date}, ${id_board}, ${event} )`  
+        const INSERT_EVENT = `INSERT INFO events (id_s, id_event,date,id_board,event) VALUES( 1, NULL , ${date}, ${id_board}, ${event} )`;
         connection.query(INSERT_EVENT, (err, results)=>{})
     }
 }
