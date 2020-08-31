@@ -6,6 +6,9 @@ import sensor from '../assets/sensor.png'
 import actuator from '../assets/actuator.png'
 import triangle from '../assets/triangle.png'
 import { Add, Edit } from '@material-ui/icons'
+import { configVariables } from '../configVariables'
+
+
 
 class Information  extends React.Component{
   constructor(props){
@@ -71,7 +74,6 @@ class Information  extends React.Component{
       default:
         deviceDesc = "None"
     }
-    
     return(
       <div className="device" key={`device${i}`}>
         {
@@ -154,8 +156,10 @@ class Information  extends React.Component{
   }
 
   nullchildren(){
+    
     if(this.state.allInfo.children.length<1)
-      return <h4>Doesn't have children</h4> 
+  return <h4>Doesn't have children</h4>
+    
   }
 
   nulldevices(){
@@ -164,13 +168,13 @@ class Information  extends React.Component{
 
   }
   load(){
-    if(this.state.part/200<0.51)
-      return<h4 className="load" style={{color: 'green'}}> load: {(this.state.part/200*100).toFixed(2)}%</h4>
+    if(this.state.part/configVariables.maxLoadTime<0.51)
+      return<h4 className="load" style={{color: 'green'}}> load: {(this.state.part/configVariables.maxLoadTime*100).toFixed(2)}%</h4>
 
-    if(this.state.part/200>0.50&&this.state.part/200<0.76)
-      return<h4 className="load" style={{color: 'yellow'}}> load: {(this.state.part/200*100).toFixed(2)}%</h4>
+    if(this.state.part/configVariables.maxLoadTime>0.50&&this.state.part/configVariables.maxLoadTime<0.76)
+      return<h4 className="load" style={{color: 'yellow'}}> load: {(this.state.part/configVariables.maxLoadTime*100).toFixed(2)}%</h4>
 
-    return<h4 className="load" style={{color: 'red'}}> load: {(this.state.part/200*100).toFixed(2)}%</h4>
+    return<h4 className="load" style={{color: 'red'}}> load: {(this.state.part/configVariables.maxLoadTime*100).toFixed(2)}%</h4>
   }
  
 
@@ -311,4 +315,6 @@ class Information  extends React.Component{
     )
   }
 }
+
+
 export default Information ;
