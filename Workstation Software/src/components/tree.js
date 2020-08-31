@@ -34,9 +34,9 @@ class TreeArduino extends React.Component{
       minTime : 1000000,
       newNode :'null',
       NodeLoad:'null'
-
     }
   }
+
   componentDidMount() {
     this.timerID = setInterval(
       () => {
@@ -61,6 +61,7 @@ class TreeArduino extends React.Component{
   handleInfoReturn() {
     this.setState({display: null})
   }
+
   getTime(item){
     if(item!=null)
     {
@@ -75,8 +76,6 @@ class TreeArduino extends React.Component{
       })
       item.children.forEach(child=>{this.getTime(child)})
     }
-    else
-      console.log('try')
   }
 
   scanTree(node){
@@ -84,29 +83,24 @@ class TreeArduino extends React.Component{
     {
       this.setState({NodeLoad:node.name})
       this.checkload2(node)
-    }
-      
+    } 
     node.children.map(child => this.scanTree(child))
   }
 
   checkload1(node){
-    
-    console.log(this.state.loadTimes[node.id])
     var timeNow =this.state.loadTimes[node.id]
-    console.log(timeNow<this.state.minTime&&this.state.loadTimes[node.id]/configVariables.maxLoadTime<configVariables.acceptableLoad)
     if(node.name!=this.state.newNode&&timeNow<this.state.minTime&&this.state.loadTimes[node.id]/configVariables.maxLoadTime<configVariables.acceptableLoad)
       {
         this.setState({minTime:this.state.loadTimes[node.id]})
         this.setState({newNode:node.name})
-        
       }
     
     node.children.map(child => this.checkload1(child))
-
     return(
       this.state.newNode
     )
   }
+  
   checkload2(node){
     this.checkload1(node)
     if(this.state.newNode!='null') 
