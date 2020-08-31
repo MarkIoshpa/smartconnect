@@ -71,6 +71,7 @@ class Information  extends React.Component{
       default:
         deviceDesc = "None"
     }
+    
     return(
       <div className="device" key={`device${i}`}>
         {
@@ -153,10 +154,8 @@ class Information  extends React.Component{
   }
 
   nullchildren(){
-    
     if(this.state.allInfo.children.length<1)
-  return <h4>Doesn't have children</h4>
-    
+      return <h4>Doesn't have children</h4> 
   }
 
   nulldevices(){
@@ -312,6 +311,4 @@ class Information  extends React.Component{
     )
   }
 }
-
-
 export default Information ;
