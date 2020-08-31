@@ -60,7 +60,6 @@ export default function AdminMapBuilder(props) {
   const [roomLines,setRoomLines]=useState([]);
   const [icons,setIcon]=useState([]);
   const [result,setResult]=useState([]);
-  const [openResult,setOpenResult]=useState(false);
   const [count,setCount]=useState(0);
   const forceUpdate = useForceUpdate();
 
@@ -221,6 +220,7 @@ export default function AdminMapBuilder(props) {
     x.push(y);
     setRoomLines(x)
   }
+
   function destroyRoom(start,size=0) {        //remove room from board-when tap twice on the start square
     let room=[];
     let flag=false;
@@ -251,9 +251,11 @@ export default function AdminMapBuilder(props) {
     setRoomLines(room);
 
   }
+
   function handleDrag(e) {
     e.dataTransfer.setData("text", e.target.id)
   }
+
   function handleDrop(e) {
     e.preventDefault();
 
@@ -316,31 +318,29 @@ export default function AdminMapBuilder(props) {
 
   }
   let boardCounter=0;
-  let boardhierarchy=[]
-  let boardConnectedToSensor=true
+  let boardConnectedToSensor=true;
   function scanTree(node) {
-
     boardCounter++;
-
     node.children.forEach(child => {
       scanTree(child)
     })
 
   }
+
   function boardMustBeWithConnection(node){
 
     if(node.devices.length === 0)
-      boardConnectedToSensor = false
+      boardConnectedToSensor = false;
 
     node.children.forEach(child => {
       boardMustBeWithConnection(child)
     })
 
   }
-  let sensorLimit=0
+  let sensorLimit=0;
   function rule1(node) {
 
-    sensorLimit=node.devices.length>sensorLimit?node.devices.length:sensorLimit
+    sensorLimit=node.devices.length>sensorLimit?node.devices.length:sensorLimit;
 
     node.children.forEach(child => {
       rule1(child)
@@ -406,7 +406,7 @@ export default function AdminMapBuilder(props) {
         }}>all
         </button>
         <button className="button" onClick={() => {
-          setCompButton("sensor")
+          setCompButton("sencdcsor")
         }}>sensors
         </button>
         <button className="button" onClick={() => {
@@ -509,7 +509,7 @@ export default function AdminMapBuilder(props) {
           }
 
           if(props.data[0])
-            scanTree(props.data[0].microcontroller)
+            scanTree(props.data[0].microcontroller);
           let twoDarray = {};
           for (let x = 0; x < 20; x++) {
             for (let y = 0; y < 14; y++) {
@@ -764,7 +764,6 @@ export default function AdminMapBuilder(props) {
                 }
                 if(!doorFlag && localStorage.getItem("checkedNine")==="true"){
                   setResult(oldArray => [...oldArray, "9"]);
-                  console.log(result)
                 }
               })
             }
@@ -795,26 +794,22 @@ export default function AdminMapBuilder(props) {
 
               })
             }
-            console.log(result)
 
             if(sensorFlag && localStorage.getItem("checkedeight")==="true"){
               setResult(oldArray => [...oldArray, "8"]);
             }
           });
-          console.log(result)
           if((boardCounter!==document.getElementsByClassName("board").length-1)&& localStorage.getItem("checked100")==="true"){
             setResult(oldArray => [...oldArray, "100"]);
           }
           if(props.data[0])
-            rule1(props.data[0].microcontroller)
-          console.log(result)
+            rule1(props.data[0].microcontroller);
           if(sensorLimit>parseInt(JSON.parse(localStorage.getItem("limitSensors"))) && localStorage.getItem("checkOne")==="true"){
             setResult(oldArray => [...oldArray, "101"]);
           }
-          console.log(result)
-          boardConnectedToSensor=true
+          boardConnectedToSensor=true;
           if(props.data[0])
-            boardMustBeWithConnection(props.data[0].microcontroller)
+            boardMustBeWithConnection(props.data[0].microcontroller);
           if(!boardConnectedToSensor && localStorage.getItem("checkedTen")==="true"){
             setResult(oldArray => [...oldArray, "110"]);
           }
