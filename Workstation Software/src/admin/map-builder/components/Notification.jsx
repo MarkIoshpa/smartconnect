@@ -2,11 +2,11 @@ import React,{useState,useEffect} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
 import { Table } from 'react-bootstrap';
-function rand() {
+export function rand() {
     return Math.round(Math.random() * 20) - 10;
 }
 
-function getModalStyle() {
+export function getModalStyle() {
 
     const left = 50 + rand();
 
@@ -34,7 +34,6 @@ export default function Notification(props) {
     const [modalStyle] = useState(getModalStyle);
     const [open, setOpen] = useState(0);
     const handleClose = () => {
-        console.log(props.result)
         setOpen(open+1);
     };
     const checkResult = (ruleNum) => {
@@ -147,14 +146,6 @@ export default function Notification(props) {
 
                 </tbody>
             </Table>
-            {/*<h2>Planner checker result</h2>*/}
-            {/*{props.result.forEach((elem,i)=>{*/}
-            {/*   arr.push(<h3>{props.icons[i]} - {elem}</h3>)*/}
-            {/*})}*/}
-            {/*{arr}*/}
-            {/*<footer>*/}
-            {/*    <button onClick={handleClose}>exit</button>*/}
-            {/*</footer>*/}
         </div>
     );
 
